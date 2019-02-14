@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 //import com.estimote.mustard.rx_goodness.rx_requirements_wizard.Requirement;
 //import com.estimote.mustard.rx_goodness.rx_requirements_wizard.RequirementsWizardFactory;
@@ -78,6 +79,10 @@ public class MainActivity extends Activity {
         }
     }
 
+    public static void setLoomoPresent(boolean present){
+        loomoPresent = present;
+    }
+
     class ButtonsListener implements View.OnClickListener {
 
         @Override
@@ -88,7 +93,6 @@ public class MainActivity extends Activity {
                 intent = new Intent(getApplicationContext(), LoadingActivity.class);
                 intent.putExtra("status", status);
                 startActivity(intent);
-//                new SendLocationTask().execute();
 
             } else if (view.getId() == R.id.setDestinationButton) {
                 intent = new Intent(getApplicationContext(), DestinationActivity.class);
@@ -96,7 +100,7 @@ public class MainActivity extends Activity {
 
             } else if (view.getId() == R.id.dismissLoomoButton) {
                 //Run async task to let server know Loomo is no longer needed
-//                new DismissLoomoTask().execute();
+                new DismissLoomoTask().execute();
 
             }
         }
@@ -189,37 +193,33 @@ public class MainActivity extends Activity {
 //        }
 //    }
 //
-//    class DismissLoomoTask extends AsyncTask<Void, Void, Boolean> {
-//
-//        private int response = 200;
-//        private String status;
-//
-//        @Override
-//        protected Boolean doInBackground(Void... voids) {
-//            String servicePath = "/dismiss/";
-//            //TODO: code to communicate with server
-//
-//            if (response != HttpURLConnection.HTTP_OK)
-//                return false;
-//            return true;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Boolean success) {
-//            super.onPostExecute(success);
-//
-//            if (success) {
-//                loomoPresent = false;
-//                isLoomoPresent();
-//                finish();
-//            } else {
-//                status = "Server error has occurred\nPlease try again later.";
-//                LoadingActivity.statusTextView.setText(status);
-//                LoadingActivity.progressBar.setVisibility(View.GONE);
-//                startActivity(intent);
-//            }
-//        }
-//
-//    }
+    class DismissLoomoTask extends AsyncTask<Void, Void, Boolean> {
+
+        private int response = 200;
+        private String status;
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            String servicePath = "/dismiss/";
+            //TODO: code to communicate with server
+
+            if (response != HttpURLConnection.HTTP_OK)
+                return false;
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+
+            if (success) {
+                loomoPresent = false;
+                isLoomoPresent();
+                finish();
+            } else {
+                Toast.makeText(getApplicationContext(), "Server error has occured\nPlease try again later.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 
 }

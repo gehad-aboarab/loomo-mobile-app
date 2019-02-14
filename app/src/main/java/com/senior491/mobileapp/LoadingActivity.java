@@ -37,7 +37,7 @@ public class LoadingActivity extends Activity {
     private boolean mScanning;
     private Handler mHandler;
     private static final int REQUEST_ENABLE_BT = 1;
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 5000;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
 
     private String status;
@@ -53,7 +53,7 @@ public class LoadingActivity extends Activity {
         status = getIntent().getStringExtra("status");
         progressBar = (ProgressBar) findViewById(R.id.progress);
         statusTextView = (TextView) findViewById(R.id.status);
-
+//        progressBar.setVisibility(View.VISIBLE);
 
         mHandler = new Handler();
 
@@ -127,7 +127,7 @@ public class LoadingActivity extends Activity {
                 @Override
                 public void run() {
                     mScanning = false;
-                    statusTextView.setText("Sometgin");
+                    validLocation();
                     mBluetoothScanner.stopScan(mLeScanCallback);
                     invalidateOptionsMenu();
                 }
@@ -137,10 +137,32 @@ public class LoadingActivity extends Activity {
 
         } else {
             mScanning = false;
-            statusTextView.setText("Sometgin");
+            validLocation();
             mBluetoothScanner.stopScan(mLeScanCallback);
         }
         invalidateOptionsMenu();
+    }
+
+    public void validLocation(){
+        if (mLeDeviceList.getCount() >= 3) {
+            statusTextView.setText("Loomo on its way...");
+
+            //simulate loomo on its way to user's location
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            MainActivity.setLoomoPresent(true);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+        else {
+            statusTextView.setText("Cannot locate you, please try again later.");
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     private class LeDeviceList {
@@ -178,7 +200,7 @@ public class LoadingActivity extends Activity {
         }
 
         public int getCount() {
-            return mLeDevices.size();
+            return mLeIds.size();
         }
     }
 
@@ -189,6 +211,7 @@ public class LoadingActivity extends Activity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            progressBar.setVisibility(View.VISIBLE);
                             ArrayList<String> beacons = new ArrayList<String>();
 
                             beacons.add("59bfdda585767280f886db284653ee35"); //Icy B
