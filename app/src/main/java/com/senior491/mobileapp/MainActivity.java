@@ -26,6 +26,10 @@ import android.widget.Toast;
 //import com.estimote.proximity_sdk.api.ProximityZoneBuilder;
 //import com.estimote.proximity_sdk.api.ProximityZoneContext;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -44,11 +48,39 @@ public class MainActivity extends Activity {
     private static boolean loomoPresent = false;
     private static boolean ongoingJourney = false;
     private Intent intent;
+    private App application;
+
+    private void startMqtt(){
+        application.mqttHelper.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean b, String s) {
+
+            }
+
+            @Override
+            public void connectionLost(Throwable throwable) {
+
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+                Log.w("Debug",mqttMessage.toString());
+                welcomeTextView.setText(mqttMessage.toString());
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+
+            }
+        });
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        application = (App) getApplication();
 
         welcomeTextView = (TextView) findViewById(R.id.loomoWelcome);
         callLoomoButton = (Button) findViewById(R.id.callLoomoButton);
@@ -63,6 +95,8 @@ public class MainActivity extends Activity {
         callLoomoButton.setOnClickListener(listener);
         setDestinationButton.setOnClickListener(listener);
         dismissLoomoButton.setOnClickListener(listener);
+
+        startMqtt();
     }
 
     void isLoomoPresent() {

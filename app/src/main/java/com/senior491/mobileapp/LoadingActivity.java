@@ -28,6 +28,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class LoadingActivity extends Activity {
@@ -39,6 +47,7 @@ public class LoadingActivity extends Activity {
     private static final int REQUEST_ENABLE_BT = 1;
     private static final long SCAN_PERIOD = 5000;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
+    private App application;
 
     private String status;
     public static ProgressBar progressBar;
@@ -49,6 +58,8 @@ public class LoadingActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
         getActionBar().setTitle(R.string.title_devices);
+
+        application = (App) getApplication();
 
         status = getIntent().getStringExtra("status");
         progressBar = (ProgressBar) findViewById(R.id.progress);
@@ -127,8 +138,10 @@ public class LoadingActivity extends Activity {
                 @Override
                 public void run() {
                     mScanning = false;
-                    validLocation();
                     mBluetoothScanner.stopScan(mLeScanCallback);
+
+                    Log.d("Mqtt", "hello1");
+                    validLocation();
                     invalidateOptionsMenu();
                 }
             }, SCAN_PERIOD);
@@ -137,6 +150,7 @@ public class LoadingActivity extends Activity {
 
         } else {
             mScanning = false;
+            Log.d("Mqtt", "hello2");
             validLocation();
             mBluetoothScanner.stopScan(mLeScanCallback);
         }
@@ -145,6 +159,28 @@ public class LoadingActivity extends Activity {
 
     public void validLocation(){
         if (mLeDeviceList.getCount() >= 3) {
+            MqttMessage msg = new MqttMessage();
+            JSONObject obj = new JSONObject();
+            try {
+                JSONObject signals = new JSONObject();
+                JSONArray signalsArray = new JSONArray();
+
+                for(int i=0; i<mLeDeviceList.getCount(); i++){
+                    signals.put(Integer.toString(i), mLeDeviceList.mLeRssis.get(i));
+                }
+                signalsArray.put(signals);
+
+                obj.put("clientID", application.deviceId);
+                obj.put("BeaconSignals", signalsArray);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            msg.setPayload(obj.toString().getBytes());
+            try {
+                application.mqttHelper.mqttAndroidClient.publish("mobile-to-server",msg);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
             statusTextView.setText("Loomo on its way...");
 
             //simulate loomo on its way to user's location
