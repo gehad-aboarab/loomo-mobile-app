@@ -16,20 +16,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONArray;
@@ -39,51 +34,76 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class LoadingActivity extends Activity {
-    private LeDeviceList mLeDeviceList;
-    private BluetoothAdapter mBluetoothAdapter;
-    private BluetoothLeScanner mBluetoothScanner;
+
+    private int status;
+    private ProgressBar progressBar;
+    private TextView statusTextView;
+
+    private Handler handler;
+    private BluetoothManager bluetoothManager;
+    private LeDeviceList leDeviceList;
+    private BluetoothAdapter bluetoothAdapter;
+    private BluetoothLeScanner bluetoothScanner;
     private boolean mScanning;
-    private Handler mHandler;
-    private static final int REQUEST_ENABLE_BT = 1;
-    private static final long SCAN_PERIOD = 5000;
-    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
     private App application;
 
-    private String status;
-    public static ProgressBar progressBar;
-    public static TextView statusTextView;
+    private static final int REQUEST_ENABLE_BT = 1;
+    private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
+    private static final long SCAN_PERIOD = 4000;
+    private static final String TAG = "SeniorSucks_Scan";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
-        getActionBar().setTitle(R.string.title_devices);
-
         application = (App) getApplication();
+//        getActionBar().setTitle(R.string.title_devices);
 
-        status = getIntent().getStringExtra("status");
+        //GUI initializations
         progressBar = (ProgressBar) findViewById(R.id.progress);
         statusTextView = (TextView) findViewById(R.id.status);
-//        progressBar.setVisibility(View.VISIBLE);
+        status = getIntent().getIntExtra("status", 0);
+    }
 
-        mHandler = new Handler();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "On resume called.");
 
+        //Bluetooth permissions and initializations
+        handler = new Handler();
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, application.BLE_UNSUPPORTED, Toast.LENGTH_SHORT).show();
             finish();
         }
 
-        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-        mBluetoothScanner = mBluetoothAdapter.getBluetoothLeScanner();
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
+        bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        bluetoothAdapter = bluetoothManager.getAdapter();
+        bluetoothScanner = bluetoothAdapter.getBluetoothLeScanner();
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, application.BLUETOOTH_UNSUPPORTED, Toast.LENGTH_SHORT).show();
             finish();
-            return;
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        //Location permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+        } else {
+            if (status == 0) {
+                statusTextView.setText(application.RETRIEVE_LOCATION);
+                progressBar.setVisibility(View.VISIBLE);
+            }
+            if (!bluetoothAdapter.isEnabled()) {
+                if (!bluetoothAdapter.isEnabled()) {
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                }
+            }
+            leDeviceList = new LeDeviceList();
+            scanLeDevice(true);
+
+            startMqtt();
         }
     }
 
@@ -92,29 +112,21 @@ public class LoadingActivity extends Activity {
         switch (requestCode) {
             case PERMISSION_REQUEST_COARSE_LOCATION: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    statusTextView.setText(status);
+                    if (status == 0) {
+                        statusTextView.setText(application.RETRIEVE_LOCATION);
+                        progressBar.setVisibility(View.VISIBLE);
+                    }
+                    return;
                 } else {
                     // Alert the user that this application requires the location permission to perform the scan.
-                    Toast.makeText(this, "Try again!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, application.LOCATION_REQUIRED, Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
                 }
             }
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (!mBluetoothAdapter.isEnabled()) {
-            if (!mBluetoothAdapter.isEnabled()) {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
-        }
-
-        mLeDeviceList = new LeDeviceList();
-        scanLeDevice(true);
-    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // User chose not to enable Bluetooth.
@@ -124,49 +136,44 @@ public class LoadingActivity extends Activity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
     @Override
     protected void onPause() {
+        Log.d(TAG, "On pause called.");
         super.onPause();
         scanLeDevice(false);
-        mLeDeviceList.clear();
+        leDeviceList.clear();
     }
 
     private void scanLeDevice(final boolean enable) {
+        Log.d(TAG, "Scan method called.");
         if (enable) {
-            // Stops scanning after a pre-defined scan period.
-            mHandler.postDelayed(new Runnable() {
+            //Stops scanning after a pre-defined scan period.
+            handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     mScanning = false;
-                    mBluetoothScanner.stopScan(mLeScanCallback);
-
-                    Log.d("Mqtt", "hello1");
                     validLocation();
-                    invalidateOptionsMenu();
+                    bluetoothScanner.stopScan(leScanCallBack);
+                    Log.d(TAG, "Scanning stopped.");
                 }
             }, SCAN_PERIOD);
             mScanning = true;
-            mBluetoothScanner.startScan(mLeScanCallback);
-
-        } else {
-            mScanning = false;
-            Log.d("Mqtt", "hello2");
-            validLocation();
-            mBluetoothScanner.stopScan(mLeScanCallback);
+            bluetoothScanner.startScan(leScanCallBack);
         }
-        invalidateOptionsMenu();
     }
 
     public void validLocation(){
-        if (mLeDeviceList.getCount() >= 3) {
+        if (leDeviceList.getCount() >= 3) {
+            //Connection to server
             MqttMessage msg = new MqttMessage();
             JSONObject obj = new JSONObject();
             try {
                 JSONObject signals = new JSONObject();
                 JSONArray signalsArray = new JSONArray();
 
-                for(int i=0; i<mLeDeviceList.getCount(); i++){
-                    signals.put(Integer.toString(i), mLeDeviceList.mLeRssis.get(i));
+                for(int i=0; i<leDeviceList.getCount(); i++){
+                    signals.put(leDeviceList.mLeIds.get(i), leDeviceList.mLeRssis.get(i));
                 }
                 signalsArray.put(signals);
 
@@ -176,28 +183,16 @@ public class LoadingActivity extends Activity {
                 e.printStackTrace();
             }
             msg.setPayload(obj.toString().getBytes());
+            Log.d(TAG, msg.toString());
             try {
-                application.mqttHelper.mqttAndroidClient.publish("mobile-to-server",msg);
+                application.mqttHelper.mqttAndroidClient.publish(application.M2S_BEACON_SIGNALS, msg);
             } catch (MqttException e) {
                 e.printStackTrace();
             }
-            statusTextView.setText("Loomo on its way...");
-
-            //simulate loomo on its way to user's location
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            MainActivity.setLoomoPresent(true);
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
         }
         else {
-            statusTextView.setText("Cannot locate you, please try again later.");
-            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, application.CANNOT_LOCATE, Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
@@ -240,14 +235,14 @@ public class LoadingActivity extends Activity {
         }
     }
 
-    private ScanCallback mLeScanCallback =
+    private ScanCallback leScanCallBack =
             new ScanCallback() {
                 @Override
                 public void onScanResult(int callbackType, final ScanResult result) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            progressBar.setVisibility(View.VISIBLE);
+                            //Filtering scan results
                             ArrayList<String> beacons = new ArrayList<String>();
 
                             beacons.add("59bfdda585767280f886db284653ee35"); //Icy B
@@ -270,8 +265,8 @@ public class LoadingActivity extends Activity {
                                     BluetoothDevice device = result.getDevice();
                                     String id = sb.toString();
                                     int rssi = result.getRssi();
-                                    Log.d("GEHAD", "identifier: " + id + " address: " + device.getAddress());
-                                    mLeDeviceList.addDevice(device, id, rssi);
+                                    Log.d(TAG, "identifier: " + id + " address: " + device.getAddress());
+                                    leDeviceList.addDevice(device, id, rssi);
                                 }
                             }
                         }
@@ -279,4 +274,43 @@ public class LoadingActivity extends Activity {
                 }
             };
 
+    private void startMqtt(){
+        application.mqttHelper.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean b, String s) {}
+
+            @Override
+            public void connectionLost(Throwable throwable) {}
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {}
+
+            @Override
+            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+                Log.w(TAG, mqttMessage.toString());
+                if (topic.equals(application.S2M_LOOMO_STATUS)) {
+                    JSONObject obj = new JSONObject(mqttMessage.toString());
+                    String loomoStatus = obj.get("status").toString();
+
+                    if (loomoStatus.equals("available")) {
+                        statusTextView.setText(application.LOOMO_AVAILABLE);
+
+                    } else if (loomoStatus.equals("unavailable")) {
+                        Toast.makeText(getApplicationContext(), application.LOOMO_UNAVAILABLE, Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+
+                } else if (topic.equals(application.S2M_LOOMO_ARRIVAL)) {
+                    MainActivity.setLoomoPresent(true);
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+
+                } else if (topic.equals(application.S2M_ERROR)) {
+                    Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+        });
+    }
 }

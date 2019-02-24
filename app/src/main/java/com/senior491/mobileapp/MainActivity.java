@@ -1,14 +1,7 @@
 package com.senior491.mobileapp;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,71 +9,29 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-//import com.estimote.mustard.rx_goodness.rx_requirements_wizard.Requirement;
-//import com.estimote.mustard.rx_goodness.rx_requirements_wizard.RequirementsWizardFactory;
-//import com.estimote.proximity_sdk.api.EstimoteCloudCredentials;
-//import com.estimote.proximity_sdk.api.ProximityObserver;
-//import com.estimote.proximity_sdk.api.ProximityObserverBuilder;
-//import com.estimote.proximity_sdk.api.ProximityZone;
-//import com.estimote.proximity_sdk.api.ProximityZoneBuilder;
-//import com.estimote.proximity_sdk.api.ProximityZoneContext;
-
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-import kotlin.jvm.functions.Function1;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends Activity {
 
     private Button callLoomoButton, setDestinationButton, dismissLoomoButton;
     private ImageView loomoImage;
     private TextView welcomeTextView;
-    private static boolean loomoPresent = false;
-    private static boolean ongoingJourney = false;
     private Intent intent;
-    private App application;
-
-    private void startMqtt(){
-        application.mqttHelper.setCallback(new MqttCallbackExtended() {
-            @Override
-            public void connectComplete(boolean b, String s) {
-
-            }
-
-            @Override
-            public void connectionLost(Throwable throwable) {
-
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-                Log.w("Debug",mqttMessage.toString());
-                welcomeTextView.setText(mqttMessage.toString());
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-
-            }
-        });
-    }
+    private final App application = (App) getApplication();
+    private static boolean loomoPresent = false;
+    //    private static boolean ongoingJourney = false;
+    private static final int RETRIEVE_LOCATION = 0;
+    private static final String TAG = "SeniorSucks_Main";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        application = (App) getApplication();
 
         welcomeTextView = (TextView) findViewById(R.id.loomoWelcome);
         callLoomoButton = (Button) findViewById(R.id.callLoomoButton);
@@ -99,17 +50,54 @@ public class MainActivity extends Activity {
         startMqtt();
     }
 
+    class ButtonsListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            if (view.getId() == R.id.callLoomoButton) {
+                //Loading activity to retrieve user location and contact server
+                intent = new Intent(getApplicationContext(), LoadingActivity.class);
+                intent.putExtra("status", RETRIEVE_LOCATION);
+                startActivity(intent);
+
+            } else if (view.getId() == R.id.setDestinationButton) {
+                //Destination activity to allow user to enter their destination
+                intent = new Intent(getApplicationContext(), DestinationActivity.class);
+                startActivity(intent);
+
+            } else if (view.getId() == R.id.dismissLoomoButton) {
+                //Dismiss Loomo through server
+                MqttMessage msg = new MqttMessage();
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("clientID", application.deviceId);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                msg.setPayload(obj.toString().getBytes());
+                Log.d(TAG, msg.toString());
+                try {
+                    application.mqttHelper.mqttAndroidClient.publish("mobile-to-server/loomo-dismissal", msg);
+                } catch (MqttException e) {
+                    Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
     void isLoomoPresent() {
         if (loomoPresent) {
             callLoomoButton.setVisibility(View.GONE);
             setDestinationButton.setVisibility(View.VISIBLE);
+            dismissLoomoButton.setVisibility(View.VISIBLE);
             loomoImage.setImageResource(R.drawable.loomo_2);
             welcomeTextView.setText("I'm here now.\nWhat would you like to do?");
         } else {
             callLoomoButton.setVisibility(View.VISIBLE);
             setDestinationButton.setVisibility(View.GONE);
+            dismissLoomoButton.setVisibility(View.GONE);
             loomoImage.setImageResource(R.drawable.loomo_1);
-            welcomeTextView.setText("Hi there! My name is Loomo.\n What would you like to do?");
+            welcomeTextView.setText("Hi there! My name is Loomo.\n I can help you find your destination.");
         }
     }
 
@@ -117,143 +105,31 @@ public class MainActivity extends Activity {
         loomoPresent = present;
     }
 
-    class ButtonsListener implements View.OnClickListener {
+    private void startMqtt(){
+        application.mqttHelper.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean b, String s) {}
 
-        @Override
-        public void onClick(View view) {
-            if (view.getId() == R.id.callLoomoButton) {
-                //Locate user and contact the server
-                String status = "Retrieving your location..";
-                intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                intent.putExtra("status", status);
-                startActivity(intent);
+            @Override
+            public void connectionLost(Throwable throwable) {}
 
-            } else if (view.getId() == R.id.setDestinationButton) {
-                intent = new Intent(getApplicationContext(), DestinationActivity.class);
-                startActivity(intent);
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {}
 
-            } else if (view.getId() == R.id.dismissLoomoButton) {
-                //Run async task to let server know Loomo is no longer needed
-                new DismissLoomoTask().execute();
+            @Override
+            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+                Log.w(TAG, mqttMessage.toString());
+
+                if (topic.equals(application.S2M_LOOMO_DISMISSAL)) {
+                    Toast.makeText(getApplicationContext(), application.DISMISSAL_SUCCESSFUL, Toast.LENGTH_SHORT).show();
+                    finish();
+
+                } else if (topic.equals(application.S2M_ERROR)) {
+                    Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                }
 
             }
-        }
-    }
-
-//    class LocateUserTask extends AsyncTask<String, String, String> {
-//
-//        private String status;
-//        private boolean success = true;
-//
-//        @Override
-//        protected String doInBackground(String... strings) {
-//            //TODO: code to obtain and store beacon IDs and signals
-//
-//            //simulate finding the location
-//            try {
-//                Thread.sleep(2000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            if (success)
-//                return "Success";
-//            return "Failure";
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String s) {
-//            super.onPostExecute(s);
-//
-//            if (s.equals("Success")) {
-//                //Run async task to contact the server
-//                new SendLocationTask().execute();
-//            } else {
-//                status = "Cannot get your location at the moment\nPlease try again later.";
-//                LoadingActivity.statusTextView.setText(status);
-//                LoadingActivity.progressBar.setVisibility(View.GONE);
-//            }
-//        }
-//    }
-
-//    class SendLocationTask extends AsyncTask<String, String, String> {
-//
-//        private String status;
-//        private boolean success = true;
-//
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//
-//            //TODO: check if user's location is reachable, if so load activity
-//            intent = new Intent(getApplicationContext(), LoadingActivity.class);
-//            intent.putExtra("status", status);
-//            startActivity(intent);
-//            status = "Please wait for me\n I am on my way to you..";
-//            LoadingActivity.statusTextView.setText(status);
-//
-//            //TODO: if user's location is unreachable, display error
-//        }
-//
-//        @Override
-//        protected String doInBackground(String... strings) {
-//            //TODO: code to send server the user's location
-//
-//            //simulate loomo on its way to user's location
-//            try {
-//                Thread.sleep(2000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            if (success)
-//                return "Success";
-//            return "Failure";
-//        }
-//
-//        @Override
-//        protected void onPostExecute(String s) {
-//            super.onPostExecute(s);
-//
-//            if (s.equals("Success")) {
-//                loomoPresent = true;
-//                isLoomoPresent();
-//                intent = new Intent(getApplicationContext(), MainActivity.class);
-//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(intent);
-//            } else {
-//                status = "Server error has occurred\nPlease try again later.";
-//                LoadingActivity.statusTextView.setText(status);
-//                LoadingActivity.progressBar.setVisibility(View.GONE);
-//            }
-//        }
-//    }
-//
-    class DismissLoomoTask extends AsyncTask<Void, Void, Boolean> {
-
-        private int response = 200;
-        private String status;
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            String servicePath = "/dismiss/";
-            //TODO: code to communicate with server
-
-            if (response != HttpURLConnection.HTTP_OK)
-                return false;
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean success) {
-            super.onPostExecute(success);
-
-            if (success) {
-                loomoPresent = false;
-                isLoomoPresent();
-                finish();
-            } else {
-                Toast.makeText(getApplicationContext(), "Server error has occured\nPlease try again later.", Toast.LENGTH_LONG).show();
-            }
-        }
+        });
     }
 
 }

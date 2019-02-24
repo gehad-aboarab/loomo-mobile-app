@@ -17,19 +17,18 @@ public class MqttHelper {
     public MqttAndroidClient mqttAndroidClient;
 
     final String serverUri = "tcp://m24.cloudmqtt.com:17852";
-
     final String clientId = "ExampleAndroidClient";
     final String subscriptionTopic = "server-to-mobile/#";
-
     final String username = "gwvgvrbb";
     final String password = "ZaQHr9ysNDPm";
+    private final String TAG = "SeniorSucks_Mqtt";
 
     public MqttHelper(Context context){
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean b, String s) {
-                Log.w("mqtt", s);
+                Log.w(TAG, s);
             }
 
             @Override
@@ -39,7 +38,7 @@ public class MqttHelper {
 
             @Override
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-                Log.w("Mqtt", mqttMessage.toString());
+                Log.w(TAG, mqttMessage.toString());
             }
 
             @Override
@@ -62,11 +61,9 @@ public class MqttHelper {
         mqttConnectOptions.setPassword(password.toCharArray());
 
         try {
-
             mqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-
                     DisconnectedBufferOptions disconnectedBufferOptions = new DisconnectedBufferOptions();
                     disconnectedBufferOptions.setBufferEnabled(true);
                     disconnectedBufferOptions.setBufferSize(100);
@@ -78,11 +75,9 @@ public class MqttHelper {
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    Log.w("Mqtt", "Failed to connect to: " + serverUri + exception.toString());
+                    Log.w(TAG, "Failed to connect to: " + serverUri + exception.toString());
                 }
             });
-
-
         } catch (MqttException ex){
             ex.printStackTrace();
         }
@@ -94,12 +89,12 @@ public class MqttHelper {
             mqttAndroidClient.subscribe(subscriptionTopic, 0, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    Log.w("Mqtt","Subscribed!");
+                    Log.w(TAG,"Subscribed!");
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    Log.w("Mqtt", "Subscribed fail!");
+                    Log.w(TAG, "Subscribed fail!");
                 }
             });
 

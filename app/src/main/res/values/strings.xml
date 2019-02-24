@@ -17,4 +17,13 @@
     <string name="menu_disconnect">Disconnect</string>
     <string name="menu_scan">Scan</string>
     <string name="menu_stop">Stop</string>
+
+    <!-- Route options -->
+    <string name="s2m">server-to-mobile</string>
+    <string name="m2s">mobile-to-server</string>
+    <string name="route_error">/error</string>
+    <string name="route_beacon_signals">/beacon-signals</string>
+    <string name="route_user_destination">/user-destination</string>
+    <string name="route_loomo_status">/loomo-status</string>
+    <string name="route_loomo_arrival">/loomo-arrival</string>
 </resources>
