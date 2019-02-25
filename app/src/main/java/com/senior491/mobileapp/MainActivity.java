@@ -22,7 +22,7 @@ public class MainActivity extends Activity {
     private ImageView loomoImage;
     private TextView welcomeTextView;
     private Intent intent;
-    private final App application = (App) getApplication();
+    private App application;
     private static boolean loomoPresent = false;
     //    private static boolean ongoingJourney = false;
     private static final int RETRIEVE_LOCATION = 0;
@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        application = (App) getApplication();
 
         welcomeTextView = (TextView) findViewById(R.id.loomoWelcome);
         callLoomoButton = (Button) findViewById(R.id.callLoomoButton);

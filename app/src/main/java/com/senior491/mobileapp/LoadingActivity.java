@@ -57,7 +57,6 @@ public class LoadingActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
         application = (App) getApplication();
-//        getActionBar().setTitle(R.string.title_devices);
 
         //GUI initializations
         progressBar = (ProgressBar) findViewById(R.id.progress);
