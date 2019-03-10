@@ -32,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class LoadingActivity extends Activity {
 
@@ -171,10 +172,10 @@ public class LoadingActivity extends Activity {
                 JSONObject signals = new JSONObject();
                 JSONArray signalsArray = new JSONArray();
 
-                for(int i=0; i<leDeviceList.getCount(); i++){
-                    signals.put(leDeviceList.mLeIds.get(i), leDeviceList.mLeRssis.get(i));
+                for(int i=0; i<leDeviceList.getCount(); i++) {
+                    signals.put(leDeviceList.mLeIds.get(i), leDeviceList.mLeDevices.get(leDeviceList.mLeIds.get(i)));
+                    signalsArray.put(signals);
                 }
-                signalsArray.put(signals);
 
                 obj.put("clientID", application.deviceId);
                 obj.put("BeaconSignals", signalsArray);
@@ -184,6 +185,7 @@ public class LoadingActivity extends Activity {
             msg.setPayload(obj.toString().getBytes());
             Log.d(TAG, msg.toString());
             try {
+                Log.d(TAG, "publishing msg");
                 application.mqttHelper.mqttAndroidClient.publish(application.M2S_BEACON_SIGNALS, msg);
             } catch (MqttException e) {
                 e.printStackTrace();
@@ -196,27 +198,25 @@ public class LoadingActivity extends Activity {
     }
 
     private class LeDeviceList {
-        private ArrayList<BluetoothDevice> mLeDevices;
+        private ArrayList<BluetoothDevice> mLeDevice;
         private ArrayList<Integer> mLeRssis;
         private ArrayList<String> mLeIds;
+        private HashMap<String, ArrayList<Integer>> mLeDevices;
 
         public LeDeviceList() {
             super();
-            mLeDevices = new ArrayList<BluetoothDevice>();
+            mLeDevices = new HashMap<>();
             mLeRssis = new ArrayList<Integer>();
             mLeIds = new ArrayList<String>();
+
         }
 
         public void addDevice(BluetoothDevice device, String id, int rssi) {
-            if (!mLeIds.contains(id)) {
-                mLeDevices.add(device);
+            if(!mLeIds.contains(id))
                 mLeIds.add(id);
-                mLeRssis.add(rssi);
-            }
-        }
-
-        public BluetoothDevice getDevice(int position) {
-            return mLeDevices.get(position);
+            ArrayList<Integer> rssiList = mLeDevices.containsKey(id) ? mLeDevices.get(id) : new ArrayList<Integer>();
+            rssiList.add(rssi);
+            mLeDevices.put(id,rssiList);
         }
 
         public int getRssi(int position) {
@@ -264,6 +264,7 @@ public class LoadingActivity extends Activity {
                                     BluetoothDevice device = result.getDevice();
                                     String id = sb.toString();
                                     int rssi = result.getRssi();
+                                    Log.d(TAG, "run: "+result.getRssi());
                                     Log.d(TAG, "identifier: " + id + " address: " + device.getAddress());
                                     leDeviceList.addDevice(device, id, rssi);
                                 }
