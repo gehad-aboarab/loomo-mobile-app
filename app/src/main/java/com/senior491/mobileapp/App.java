@@ -1,21 +1,14 @@
 package com.senior491.mobileapp;
 
-import android.Manifest;
 import android.app.Application;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-
-import java.util.UUID;
 
 public class App extends Application {
 
@@ -50,8 +43,10 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        deviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wInfo = wifiManager.getConnectionInfo();
+        deviceId = wInfo.getMacAddress();
         Log.d(TAG, deviceId);
         mqttHelper = new MqttHelper(getApplicationContext());
     }
