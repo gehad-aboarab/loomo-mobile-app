@@ -140,8 +140,10 @@ public class LoadingActivity extends Activity {
     protected void onPause() {
         Log.d(TAG, "On pause called.");
         super.onPause();
-        scanLeDevice(false);
-        leDeviceList.clear();
+        if(leDeviceList != null) {
+            scanLeDevice(false);
+            leDeviceList.clear();
+        }
     }
 
     private void scanLeDevice(final boolean enable) {
@@ -184,6 +186,7 @@ public class LoadingActivity extends Activity {
             msg.setPayload(obj.toString().getBytes());
             Log.d(TAG, msg.toString());
             try {
+                Log.d(TAG, "Sending hussain stuff now!");
                 application.mqttHelper.mqttAndroidClient.publish(application.M2S_BEACON_SIGNALS, msg);
             } catch (MqttException e) {
                 e.printStackTrace();
