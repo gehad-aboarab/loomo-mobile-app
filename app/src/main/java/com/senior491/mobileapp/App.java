@@ -2,12 +2,17 @@ package com.senior491.mobileapp;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 
+import org.eclipse.paho.android.service.MqttService;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public class App extends Application {
@@ -44,9 +49,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
-        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wInfo = wifiManager.getConnectionInfo();
-        deviceId = wInfo.getMacAddress();
+        deviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         Log.d(TAG, deviceId);
         mqttHelper = new MqttHelper(getApplicationContext());
     }

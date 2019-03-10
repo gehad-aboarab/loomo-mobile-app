@@ -50,7 +50,7 @@ public class LoadingActivity extends Activity {
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
-    private static final long SCAN_PERIOD = 4000;
+    private static final long SCAN_PERIOD = 8000;
     private static final String TAG = "SeniorSucks_Scan";
 
     @Override
@@ -172,10 +172,10 @@ public class LoadingActivity extends Activity {
             MqttMessage msg = new MqttMessage();
             JSONObject obj = new JSONObject();
             try {
-                JSONObject signals = new JSONObject();
                 JSONArray signalsArray = new JSONArray();
 
                 for(int i=0; i<leDeviceList.getCount(); i++) {
+                    JSONObject signals = new JSONObject();
                     signals.put(leDeviceList.mLeIds.get(i), leDeviceList.mLeDevices.get(leDeviceList.mLeIds.get(i)));
                     signalsArray.put(signals);
                 }
@@ -215,11 +215,13 @@ public class LoadingActivity extends Activity {
         }
 
         public void addDevice(BluetoothDevice device, String id, int rssi) {
+            Log.d(TAG, "addDevice: "+id+" "+rssi);
             if(!mLeIds.contains(id))
                 mLeIds.add(id);
             ArrayList<Integer> rssiList = mLeDevices.containsKey(id) ? mLeDevices.get(id) : new ArrayList<Integer>();
             rssiList.add(rssi);
             mLeDevices.put(id,rssiList);
+            Log.d(TAG, "addDevice: "+ mLeDevices.toString());
         }
 
         public int getRssi(int position) {
@@ -304,7 +306,7 @@ public class LoadingActivity extends Activity {
                     }
 
                 } else if (topic.equals(application.S2M_LOOMO_ARRIVAL)) {
-                    MainActivity.setLoomoPresent(true);
+                    //MainActivity.setLoomoPresent(true);
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
