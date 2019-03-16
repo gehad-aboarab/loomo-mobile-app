@@ -26,7 +26,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,13 +36,12 @@
         </activity>
         <activity
             android:name=".LoadingActivity"
-            android:label="@string/app_name" />
-        <activity
-            android:name=".DestinationActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".SuccessActivity"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"/>
 
         <service android:name="org.eclipse.paho.android.service.MqttService"/>
     </application>

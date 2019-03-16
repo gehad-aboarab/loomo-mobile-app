@@ -27,6 +27,7 @@ public class App extends Application {
 
     //User message strings
     public static final String RETRIEVE_LOCATION = "Retrieving your location.\nPlease wait..";
+    public static final String ONGOING_JOURNEY = "Your journey is ongoing..";
     public static final String LOOMO_AVAILABLE = "Loomo on its way!";
     public static final String DISMISSAL_SUCCESSFUL = "Loomo dismissed!";
 
@@ -37,12 +38,14 @@ public class App extends Application {
     public static final String S2M_LOOMO_ARRIVAL = "server-to-mobile/loomo-arrival";
     public static final String S2M_USER_DESTINATION = "server-to-mobile/user-destination";
     public static final String S2M_ERROR = "server-to-mobile/error";
-    public static final String S2M_LOOMO_DISMISSAL = "server-to-mobile/loomo-dismissal";
+    public static final String M2S_LOOMO_DISMISSAL = "mobile-to-server/loomo-dismissal";
     public static final String M2S_BEACON_SIGNALS = "mobile-to-server/beacon-signals";
     public static final String M2S_USER_DESTINATION = "mobile-to-server/user-destination";
 
     public String deviceId;
+    public String loomoId;
     public MqttHelper mqttHelper;
+    public boolean usingLoomo = false;
     private final String TAG = "SeniorSucks_App";
 
     @Override

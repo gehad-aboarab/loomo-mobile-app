@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Loomo</string>
+    <string name="app_name">OHM-G</string>
     <string name="ble_not_supported">BLE is not supported</string>
     <string name="label_data">Data:</string>
     <string name="label_device_address">Device address:</string>
@@ -26,4 +26,13 @@
     <string name="route_user_destination">/user-destination</string>
     <string name="route_loomo_status">/loomo-status</string>
     <string name="route_loomo_arrival">/loomo-arrival</string>
+
+    <string-array name="destination_array">
+        <item>EB1-103</item>
+        <item>EB1-104</item>
+        <item>EB1-105</item>
+        <item>EB1-106</item>
+        <item>EB1-107</item>
+        <item>EB1-108</item>
+    </string-array>
 </resources>

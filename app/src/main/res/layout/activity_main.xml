@@ -5,71 +5,114 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#a8a8a8"
-    tools:context=".MainActivity">
+    tools:context=".DestinationActivity">
 
-    <ImageView
-        android:id="@+id/loomoImage"
-        android:layout_width="329dp"
-        android:layout_height="231dp"
+    <TextView
+        android:id="@+id/main_destinationMethodLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="10dp"
-        android:src="@drawable/loomo_1"
+        android:layout_marginTop="50dp"
+        android:fontFamily="serif"
+        android:text="How would you like to go?"
+        android:textColor="#fff"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.512"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/loomoWelcome"
+    <RadioGroup
+        android:id="@+id/main_radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_destinationMethodLabel">
+
+        <RadioButton
+            android:id="@+id/main_rideRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:checked="false"
+            android:fontFamily="serif"
+            android:text="Ride Loomo"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/main_guideRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="serif"
+            android:checked="true"
+            android:text="Guided by Loomo"
+            android:textColor="#fff"
+            android:textSize="14sp" />
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/main_destinationLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="8dp"
         android:fontFamily="serif"
-        android:lineSpacingExtra="7dp"
-        android:lines="3"
-        android:singleLine="false"
-        android:text="Hi there! My name is Loomo.\nWhat would you like to do?"
-        android:textAlignment="center"
-        android:textColor="#ffffff"
-        android:textSize="16sp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loomoImage" />
+        android:text="Where would you like to go?"
+        android:textColor="#fff"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_radioGroup"
+        tools:fontFamily="serif" />
+
+    <Spinner
+        android:id="@+id/main_destinationSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:textColor="#fff"
+        android:fontFamily="serif"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_destinationLabel" />
+
+    <ImageView
+        android:id="@+id/main_loomoImage"
+        android:layout_width="409dp"
+        android:layout_height="401dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:src="@drawable/loomo_3"
+        app:layout_constraintBottom_toTopOf="@+id/main_callButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_destinationSpinner" />
 
     <Button
-        android:id="@+id/dismissLoomoButton"
+        android:id="@+id/main_callButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="Dismiss Me"
+        android:text="Call Loomo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/setDestinationButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:text="Set Destination"
-        app:layout_constraintBottom_toTopOf="@+id/dismissLoomoButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/callLoomoButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:text="Call Me"
-        app:layout_constraintBottom_toTopOf="@+id/setDestinationButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-
 </android.support.constraint.ConstraintLayout>
