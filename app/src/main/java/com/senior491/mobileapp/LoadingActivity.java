@@ -55,6 +55,7 @@ public class LoadingActivity extends Activity {
             switch(callBackCode){
                 case 1001:
                     Toast.makeText(getApplicationContext(),(String)obj,Toast.LENGTH_LONG).show();
+                    finish();
                     break;
                 case 1002:
                     loomoStatusReceived = false;
