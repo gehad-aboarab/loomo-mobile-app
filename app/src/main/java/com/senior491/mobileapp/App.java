@@ -48,7 +48,7 @@ public class App extends Application {
     public MqttHelper mqttHelper;
     public boolean usingLoomo = false;
     public String mapName = "SampleMap";
-    public ArrayList<Destination> destinations;
+    public ArrayList<String> destinations;
     private final String TAG = "SeniorSucks_App";
 
     @Override

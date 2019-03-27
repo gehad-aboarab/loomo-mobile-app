@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class MainActivity extends Activity {
 
@@ -98,15 +99,19 @@ public class MainActivity extends Activity {
                 }
             }
         });
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
         if(application.mqttHelper.mqttAndroidClient.isConnected()){
-            getUpdatedDestinations("SampleMap");
-        } else {
-            startMqtt();
+            getUpdatedDestinations(application.mapName);
         }
+        startMqtt();
     }
 
     // asking the server for the latest destination names from the map
+    // clientID and mapName required
     private void getUpdatedDestinations(String mapName){
         MqttMessage msg = new MqttMessage();
         JSONObject obj = new JSONObject();
@@ -126,10 +131,12 @@ public class MainActivity extends Activity {
     }
 
     // Adding the destinations received from the server into the destinations spinner
-    private void initDestinations(){
+    // sorts the list before adding to spinner
+    private void initDestinationsSpinner(){
         destinationNames = new ArrayList<>();
-        for(Destination d:application.destinations){ destinationNames.add(d.getName()); }
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, destinationNames);
+        for(String s:application.destinations){ destinationNames.add(s); }
+        Collections.sort(destinationNames, String.CASE_INSENSITIVE_ORDER);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, destinationNames);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         destinationSpinner.setAdapter(spinnerArrayAdapter);
     }
@@ -150,17 +157,20 @@ public class MainActivity extends Activity {
                 if (clientId.equals(application.deviceId)) {
                     if (topic.equals(application.S2M_GET_MAP_DESTINATIONS)) {
                         Log.d(TAG, "inside route"+mqttMessage.toString());
-                        JSONArray destinations = obj.getJSONArray("destinations");
-                        for (int i = 0; i < destinations.length(); i++) {
-                            String name = destinations.getJSONObject(i).getString("name");
-                            JSONObject corners = destinations.getJSONObject(i).getJSONObject("corners");
-                            String[] cornerArray = new String[]{corners.getString("0"), corners.getString("1"), corners.getString("2"), corners.getString("3")};
-                            application.destinations.add(new Destination(name, cornerArray));
-                            Log.d(TAG, application.destinations.toString());
+                        try {
+                            JSONArray destinations = obj.getJSONArray("destinations");
+                            application.destinations.clear();
+                            for (int i = 0; i < destinations.length(); i++) {
+                                String name = destinations.getJSONObject(i).getString("name");
+                                application.destinations.add(name);
+                                Log.d(TAG, application.destinations.toString());
+                            }
+                        } catch(Exception e){
+                            Log.d(TAG, "messageArrived Error: "+e.getMessage());
                         }
 
                     }
-                    initDestinations();
+                    initDestinationsSpinner();
 //                    } else if (topic.equals(mobApp.S2M_ERROR)) {
 //                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
 //                        finish();

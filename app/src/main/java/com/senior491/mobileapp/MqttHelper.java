@@ -35,49 +35,15 @@ public class MqttHelper {
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
-            public void connectComplete(boolean b, String s) {
-                Log.w(TAG, s);
-
-//                MqttMessage msg = new MqttMessage();
-//                JSONObject obj = new JSONObject();
-//                try {
-//                    obj.put("clientID", mobApp.deviceId);
-//                    obj.put("mapName", "SampleMap");
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//                msg.setPayload(obj.toString().getBytes());
-//                Log.d(TAG, msg.toString());
-//                try {
-//                    mqttAndroidClient.publish(mobApp.M2S_GET_MAP_DESTINATIONS, msg);
-//                } catch (MqttException e) {
-//                    e.printStackTrace();
-//                }
-
-            }
-
+            public void connectComplete(boolean b, String s) { Log.w(TAG, s); }
             @Override
-            public void connectionLost(Throwable throwable) {
-                Log.d(TAG, "connectionLost: i have been lost died ");
-            }
-
+            public void connectionLost(Throwable throwable) { }
             @Override
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
                 Log.w(TAG, mqttMessage.toString());
                 JSONObject obj = new JSONObject(mqttMessage.toString());
                 String clientId = obj.get("clientID").toString();
                 if (clientId.equals(mobApp.deviceId)) {
-                    if (topic.equals(mobApp.S2M_GET_MAP_DESTINATIONS)) {
-                        JSONArray destinations = obj.getJSONArray("destinations");
-                        for (int i = 0; i < destinations.length(); i++) {
-                            String name = destinations.getJSONObject(i).getString("name");
-                            JSONObject corners = destinations.getJSONObject(i).getJSONObject("corners");
-                            String[] cornerArray = new String[]{corners.getString("0"), corners.getString("1"), corners.getString("2"), corners.getString("3")};
-                            mobApp.destinations.add(new Destination(name, cornerArray));
-                            Log.d(TAG, mobApp.destinations.toString());
-                        }
-
-                    }
 //                    } else if (topic.equals(mobApp.S2M_ERROR)) {
 //                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
 //                        finish();
