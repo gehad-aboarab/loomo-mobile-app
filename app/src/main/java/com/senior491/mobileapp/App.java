@@ -1,19 +1,18 @@
 package com.senior491.mobileapp;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
-import org.eclipse.paho.android.service.MqttService;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class App extends Application {
 
@@ -36,16 +35,19 @@ public class App extends Application {
     public static final String TOPIC_MOBILE_TO_SERVER = "mobile-to-server";
     public static final String S2M_LOOMO_STATUS = "server-to-mobile/loomo-status";
     public static final String S2M_LOOMO_ARRIVAL = "server-to-mobile/loomo-arrival";
-    public static final String S2M_USER_DESTINATION = "server-to-mobile/user-destination";
+    public static final String S2M_GET_MAP_DESTINATIONS = "server-to-mobile/get-map-destinations";
+    //    public static final String S2M_USER_DESTINATION = "server-to-mobile/user-destination";
     public static final String S2M_ERROR = "server-to-mobile/error";
     public static final String M2S_LOOMO_DISMISSAL = "mobile-to-server/loomo-dismissal";
     public static final String M2S_BEACON_SIGNALS = "mobile-to-server/beacon-signals";
-    public static final String M2S_USER_DESTINATION = "mobile-to-server/user-destination";
+    public static final String M2S_GET_MAP_DESTINATIONS = "mobile-to-server/get-map-destinations";
+//    public static final String M2S_USER_DESTINATION = "mobile-to-server/user-destination";
 
     public String deviceId;
     public String loomoId;
     public MqttHelper mqttHelper;
     public boolean usingLoomo = false;
+    public ArrayList<Destination> destinations;
     private final String TAG = "SeniorSucks_App";
 
     @Override
@@ -54,7 +56,8 @@ public class App extends Application {
 
         deviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         Log.d(TAG, deviceId);
-        mqttHelper = new MqttHelper(getApplicationContext());
+        destinations = new ArrayList<>();
+        mqttHelper = new MqttHelper(this);
     }
 
 }

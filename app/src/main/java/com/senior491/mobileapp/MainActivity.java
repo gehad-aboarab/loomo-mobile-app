@@ -7,18 +7,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
@@ -29,6 +31,7 @@ public class MainActivity extends Activity {
 
     private Intent intent;
     private App application;
+    private ArrayList<String> destinationNames;
 
     private static final int RETRIEVE_LOCATION = 0;
     private static final String TAG = "SeniorSucks_Main";
@@ -44,80 +47,125 @@ public class MainActivity extends Activity {
         radioGroup = (RadioGroup) findViewById(R.id.main_radioGroup);
         rideRadioButton = (RadioButton) findViewById(R.id.main_rideRadioButton);
         guideRadioButton = (RadioButton) findViewById(R.id.main_guideRadioButton);
+        destinationSpinner = (Spinner) findViewById(R.id.main_destinationSpinner);
 
         if (application.usingLoomo) {
             intent = new Intent(getApplicationContext(), SuccessActivity.class);
             startActivity(intent);
         }
 
-        destinationSpinner = (Spinner) findViewById(R.id.main_destinationSpinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.destination_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        destinationSpinner.setAdapter(adapter);
+//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.destination_array, android.R.layout.simple_spinner_item);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        destinationSpinner.setAdapter(adapter);
+//        destinationNames = new ArrayList<>();
+//        for(Destination d:application.destinations){
+//            destinationNames.add(d.getName());
+//        }
+//        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, destinationNames);
+//        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        destinationSpinner.setAdapter(spinnerArrayAdapter);
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if(checkedId == R.id.main_rideRadioButton){
+                if (checkedId == R.id.main_rideRadioButton) {
                     destinationSpinner.setEnabled(false);
-                } else if (checkedId == R.id.main_guideRadioButton){
+                } else if (checkedId == R.id.main_guideRadioButton) {
                     destinationSpinner.setEnabled(true);
                 }
             }
         });
 
         callLoomoButton.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View v) {
-                 if (v.getId() == R.id.main_callButton) {
-                     if(destinationSpinner.getSelectedItem() == null && guideRadioButton.isChecked()){
-                         Toast.makeText(getApplicationContext(), "Please select a destination!", Toast.LENGTH_SHORT).show();
-                     } else if (guideRadioButton.isChecked()) {
-                         String selectedDestination = destinationSpinner.getSelectedItem().toString();
-                         intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                         intent.putExtra("destination", selectedDestination);
-                         intent.putExtra("mode", 0); //guide mode
-                         intent.putExtra("status", "request journey");
-                         startActivity(intent);
-                     } else if(rideRadioButton.isChecked()){
-                         intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                         intent.putExtra("mode", 1); //ride mode
-                         intent.putExtra("status", "request journey");
-                         startActivity(intent);
-                     }
-                 }
-             }
+            @Override
+            public void onClick(View v) {
+                if (v.getId() == R.id.main_callButton) {
+                    if (destinationSpinner.getSelectedItem() == null && guideRadioButton.isChecked()) {
+                        Toast.makeText(getApplicationContext(), "Please select a destination!", Toast.LENGTH_SHORT).show();
+                    } else if (guideRadioButton.isChecked()) {
+                        String selectedDestination = destinationSpinner.getSelectedItem().toString();
+                        intent = new Intent(getApplicationContext(), LoadingActivity.class);
+                        intent.putExtra("destination", selectedDestination);
+                        intent.putExtra("mode", 0); //guide mode
+                        intent.putExtra("status", "request journey");
+                        startActivity(intent);
+                    } else if (rideRadioButton.isChecked()) {
+                        intent = new Intent(getApplicationContext(), LoadingActivity.class);
+                        intent.putExtra("mode", 1); //ride mode
+                        intent.putExtra("status", "request journey");
+                        startActivity(intent);
+                    }
+                }
+            }
         });
 
-//            startMqtt();
+            startMqtt();
+    }
+
+    private void initDestinations(){
+        destinationNames = new ArrayList<>();
+        for(Destination d:application.destinations){
+            destinationNames.add(d.getName());
         }
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, destinationNames);
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        destinationSpinner.setAdapter(spinnerArrayAdapter);
+    }
 
+    private void startMqtt(){
+        application.mqttHelper.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean b, String s) {
+                MqttMessage msg = new MqttMessage();
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("clientID", application.deviceId);
+                    obj.put("mapName", "SampleMap");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                msg.setPayload(obj.toString().getBytes());
+                Log.d(TAG, msg.toString());
+                try {
+                    application.mqttHelper.mqttAndroidClient.publish(application.M2S_GET_MAP_DESTINATIONS, msg);
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
+            }
 
-//    private void startMqtt(){
-//        application.mqttHelper.setCallback(new MqttCallbackExtended() {
-//            @Override
-//            public void connectComplete(boolean b, String s) {}
-//
-//            @Override
-//            public void connectionLost(Throwable throwable) {}
-//
-//            @Override
-//            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {}
-//
-//            @Override
-//            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-//                Log.w(TAG, mqttMessage.toString());
-//
-//                if (topic.equals(application.S2M_LOOMO_DISMISSAL)) {
-//                    Toast.makeText(getApplicationContext(), application.DISMISSAL_SUCCESSFUL, Toast.LENGTH_SHORT).show();
-//                    finish();
-//
-//                } else if (topic.equals(application.S2M_ERROR)) {
-//                    Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
-//                }
-//
-//            }
-//        });
-//    }
+            @Override
+            public void connectionLost(Throwable throwable) {}
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {}
+
+            @Override
+            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+                Log.w(TAG, mqttMessage.toString());
+                JSONObject obj = new JSONObject(mqttMessage.toString());
+                String clientId = obj.get("clientID").toString();
+                if (clientId.equals(application.deviceId)) {
+                    if (topic.equals(application.S2M_GET_MAP_DESTINATIONS)) {
+                        JSONArray destinations = obj.getJSONArray("destinations");
+                        for (int i = 0; i < destinations.length(); i++) {
+                            String name = destinations.getJSONObject(i).getString("name");
+                            JSONObject corners = destinations.getJSONObject(i).getJSONObject("corners");
+                            String[] cornerArray = new String[]{corners.getString("0"), corners.getString("1"), corners.getString("2"), corners.getString("3")};
+                            application.destinations.add(new Destination(name, cornerArray));
+                            Log.d(TAG, application.destinations.toString());
+                        }
+
+                    }
+                    Log.d(TAG, "messageArrived: hiiiiiiiiiiiiiiiiiiiiiiii");
+                    initDestinations();
+//                    } else if (topic.equals(mobApp.S2M_ERROR)) {
+//                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+//                        finish();
+//                    }
+                }
+
+            }
+        });
+    }
 
 }
