@@ -99,14 +99,36 @@ public class MainActivity extends Activity {
             }
         });
 
+        if(application.mqttHelper.mqttAndroidClient.isConnected()){
+            getUpdatedDestinations("SampleMap");
+        } else {
             startMqtt();
+        }
     }
 
+    // asking the server for the latest destination names from the map
+    private void getUpdatedDestinations(String mapName){
+        MqttMessage msg = new MqttMessage();
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("clientID", application.deviceId);
+            obj.put("mapName", application.mapName);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        msg.setPayload(obj.toString().getBytes());
+        Log.d(TAG, msg.toString());
+        try {
+            application.mqttHelper.mqttAndroidClient.publish(application.M2S_GET_MAP_DESTINATIONS, msg);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Adding the destinations received from the server into the destinations spinner
     private void initDestinations(){
         destinationNames = new ArrayList<>();
-        for(Destination d:application.destinations){
-            destinationNames.add(d.getName());
-        }
+        for(Destination d:application.destinations){ destinationNames.add(d.getName()); }
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, destinationNames);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         destinationSpinner.setAdapter(spinnerArrayAdapter);
@@ -115,37 +137,19 @@ public class MainActivity extends Activity {
     private void startMqtt(){
         application.mqttHelper.setCallback(new MqttCallbackExtended() {
             @Override
-            public void connectComplete(boolean b, String s) {
-                MqttMessage msg = new MqttMessage();
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("clientID", application.deviceId);
-                    obj.put("mapName", "SampleMap");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                msg.setPayload(obj.toString().getBytes());
-                Log.d(TAG, msg.toString());
-                try {
-                    application.mqttHelper.mqttAndroidClient.publish(application.M2S_GET_MAP_DESTINATIONS, msg);
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
-            }
-
+            public void connectComplete(boolean b, String s) { getUpdatedDestinations(application.mapName); }
             @Override
             public void connectionLost(Throwable throwable) {}
-
             @Override
             public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {}
 
             @Override
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-                Log.w(TAG, mqttMessage.toString());
                 JSONObject obj = new JSONObject(mqttMessage.toString());
                 String clientId = obj.get("clientID").toString();
                 if (clientId.equals(application.deviceId)) {
                     if (topic.equals(application.S2M_GET_MAP_DESTINATIONS)) {
+                        Log.d(TAG, "inside route"+mqttMessage.toString());
                         JSONArray destinations = obj.getJSONArray("destinations");
                         for (int i = 0; i < destinations.length(); i++) {
                             String name = destinations.getJSONObject(i).getString("name");
@@ -156,7 +160,6 @@ public class MainActivity extends Activity {
                         }
 
                     }
-                    Log.d(TAG, "messageArrived: hiiiiiiiiiiiiiiiiiiiiiiii");
                     initDestinations();
 //                    } else if (topic.equals(mobApp.S2M_ERROR)) {
 //                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
