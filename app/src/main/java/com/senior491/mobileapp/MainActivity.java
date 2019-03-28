@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 public class MainActivity extends Activity {
@@ -55,17 +56,6 @@ public class MainActivity extends Activity {
             startActivity(intent);
         }
 
-//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.destination_array, android.R.layout.simple_spinner_item);
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        destinationSpinner.setAdapter(adapter);
-//        destinationNames = new ArrayList<>();
-//        for(Destination d:application.destinations){
-//            destinationNames.add(d.getName());
-//        }
-//        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, destinationNames);
-//        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        destinationSpinner.setAdapter(spinnerArrayAdapter);
-
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -81,8 +71,8 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (v.getId() == R.id.main_callButton) {
-                    if (destinationSpinner.getSelectedItem() == null && guideRadioButton.isChecked()) {
-                        Toast.makeText(getApplicationContext(), "Please select a destination!", Toast.LENGTH_SHORT).show();
+                    if ((destinationSpinner.getSelectedItem() == null ||destinationSpinner.getSelectedItem().equals(application.DEFAULT_DESTINATION))&& guideRadioButton.isChecked()) {
+                        Toast.makeText(getApplicationContext(), R.string.error_no_destination_selected, Toast.LENGTH_SHORT).show();
                     } else if (guideRadioButton.isChecked()) {
                         String selectedDestination = destinationSpinner.getSelectedItem().toString();
                         intent = new Intent(getApplicationContext(), LoadingActivity.class);
@@ -104,6 +94,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        application.destinations.clear();
         if(application.mqttHelper.mqttAndroidClient.isConnected()){
             getUpdatedDestinations(application.mapName);
         }
@@ -134,8 +125,8 @@ public class MainActivity extends Activity {
     // sorts the list before adding to spinner
     private void initDestinationsSpinner(){
         destinationNames = new ArrayList<>();
-        for(String s:application.destinations){ destinationNames.add(s); }
-        Collections.sort(destinationNames, String.CASE_INSENSITIVE_ORDER);
+        destinationNames.add(application.DEFAULT_DESTINATION);
+        destinationNames.addAll(application.destinations);
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, destinationNames);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         destinationSpinner.setAdapter(spinnerArrayAdapter);
@@ -163,8 +154,8 @@ public class MainActivity extends Activity {
                             for (int i = 0; i < destinations.length(); i++) {
                                 String name = destinations.getJSONObject(i).getString("name");
                                 application.destinations.add(name);
-                                Log.d(TAG, application.destinations.toString());
                             }
+                            Collections.sort(application.destinations, String.CASE_INSENSITIVE_ORDER);
                         } catch(Exception e){
                             Log.d(TAG, "messageArrived Error: "+e.getMessage());
                         }

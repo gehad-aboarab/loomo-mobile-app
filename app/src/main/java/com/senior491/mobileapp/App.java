@@ -43,6 +43,8 @@ public class App extends Application {
     public static final String M2S_GET_MAP_DESTINATIONS = "mobile-to-server/get-map-destinations";
 //    public static final String M2S_USER_DESTINATION = "mobile-to-server/user-destination";
 
+    public static final String DEFAULT_DESTINATION = "Please select a destination";
+
     public String deviceId;
     public String loomoId;
     public MqttHelper mqttHelper;

@@ -27,4 +27,6 @@
     <string name="route_loomo_status">/loomo-status</string>
     <string name="route_loomo_arrival">/loomo-arrival</string>
 
+    <string name="error_no_destination_selected">Please select a valid destination</string>
+
 </resources>
