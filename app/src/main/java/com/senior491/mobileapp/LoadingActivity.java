@@ -97,46 +97,54 @@ public class LoadingActivity extends Activity {
         dismissButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(application.usingLoomo){
-                    MqttMessage msg = new MqttMessage();
-                    JSONObject obj = new JSONObject();
-                    try {
-                        obj.put("clientID", application.deviceId);
-                        obj.put("loomoID", application.loomoId);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    msg.setPayload(obj.toString().getBytes());
-                    Log.d(TAG, msg.toString());
-                    try {
-                        application.mqttHelper.mqttAndroidClient.publish(application.M2S_LOOMO_DISMISSAL, msg);
-                    } catch (MqttException e) {
-                        e.printStackTrace();
-                    }
-
-                } else if(scanningBLE.isScanning()) {
-                    scanningBLE.stopScan();
-
-                } else {
-                    MqttMessage msg = new MqttMessage();
-                    JSONObject obj = new JSONObject();
-                    try {
-                        obj.put("clientID", application.deviceId);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    msg.setPayload(obj.toString().getBytes());
-                    Log.d(TAG, msg.toString());
-                    try {
-                        application.mqttHelper.mqttAndroidClient.publish(application.M2S_LOOMO_DISMISSAL, msg);
-                    } catch (MqttException e) {
-                        e.printStackTrace();
-                    }
-                }
-                finish();
-
+                dismissLoomo(false);
             }
         });
+    }
+
+    public void dismissLoomo(boolean serverCommand) {
+        if(serverCommand && application.usingLoomo) {
+            application.usingLoomo = false;
+        } else {
+            if(application.usingLoomo){
+                MqttMessage msg = new MqttMessage();
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("clientID", application.deviceId);
+                    obj.put("loomoID", application.loomoId);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                msg.setPayload(obj.toString().getBytes());
+                Log.d(TAG, msg.toString());
+                try {
+                    application.mqttHelper.mqttAndroidClient.publish(application.M2S_LOOMO_DISMISSAL, msg);
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
+                application.usingLoomo = false;
+
+            } else if(scanningBLE.isScanning()) {
+                scanningBLE.stopScan();
+
+            } else {
+                MqttMessage msg = new MqttMessage();
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("clientID", application.deviceId);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                msg.setPayload(obj.toString().getBytes());
+                Log.d(TAG, msg.toString());
+                try {
+                    application.mqttHelper.mqttAndroidClient.publish(application.M2S_LOOMO_DISMISSAL, msg);
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        finish();
     }
 
     @Override
@@ -255,6 +263,9 @@ public class LoadingActivity extends Activity {
                     application.usingLoomo = true;
                     Intent intent = new Intent(getApplicationContext(), SuccessActivity.class);
                     startActivity(intent);
+
+                } else if (topic.equals(application.S2M_LOOMO_DISMISS)) {
+                    dismissLoomo(true);
 
                 } else if (topic.equals(application.S2M_ERROR)) {
                     Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();

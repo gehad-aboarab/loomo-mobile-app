@@ -150,18 +150,22 @@ public class MainActivity extends Activity {
                         Log.d(TAG, "inside route"+mqttMessage.toString());
                         try {
                             JSONArray destinations = obj.getJSONArray("destinations");
-                            application.destinations.clear();
-                            for (int i = 0; i < destinations.length(); i++) {
-                                String name = destinations.getJSONObject(i).getString("name");
-                                application.destinations.add(name);
+                            if(application.destinations.size() == 0) {
+                                application.destinations.clear();
+                                for (int i = 0; i < destinations.length(); i++) {
+                                    String name = destinations.getJSONObject(i).getString("name");
+                                    application.destinations.add(name);
+                                }
+                                Collections.sort(application.destinations, String.CASE_INSENSITIVE_ORDER);
+                                initDestinationsSpinner();
                             }
-                            Collections.sort(application.destinations, String.CASE_INSENSITIVE_ORDER);
                         } catch(Exception e){
                             Log.d(TAG, "messageArrived Error: "+e.getMessage());
                         }
 
                     }
-                    initDestinationsSpinner();
+
+
 //                    } else if (topic.equals(mobApp.S2M_ERROR)) {
 //                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
 //                        finish();

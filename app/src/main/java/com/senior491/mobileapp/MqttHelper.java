@@ -21,7 +21,7 @@ public class MqttHelper {
     public MqttAndroidClient mqttAndroidClient;
 
     final String serverUri = "tcp://m24.cloudmqtt.com:17852";
-    final String clientId = "ExampleAndroidClient";
+    String clientId;
     final String subscriptionTopic = "server-to-mobile/#";
     final String username = "gwvgvrbb";
     final String password = "ZaQHr9ysNDPm";
@@ -29,9 +29,9 @@ public class MqttHelper {
     final App mobApp;
 
     public MqttHelper(Application app) {
-
         Context context = app.getApplicationContext();
         mobApp = (App) app;
+        clientId = mobApp.deviceId;
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override

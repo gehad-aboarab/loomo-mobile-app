@@ -30,6 +30,7 @@ public class SuccessActivity extends Activity {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // TODO: send start journey signal to server
                 Intent intent = new Intent(getApplicationContext(), LoadingActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("status", "ongoing journey");

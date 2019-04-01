@@ -36,12 +36,11 @@ public class App extends Application {
     public static final String S2M_LOOMO_STATUS = "server-to-mobile/loomo-status";
     public static final String S2M_LOOMO_ARRIVAL = "server-to-mobile/loomo-arrival";
     public static final String S2M_GET_MAP_DESTINATIONS = "server-to-mobile/get-map-destinations";
-    //    public static final String S2M_USER_DESTINATION = "server-to-mobile/user-destination";
+    public static final String S2M_LOOMO_DISMISS = "server-to-mobile/loomo-dismiss";
     public static final String S2M_ERROR = "server-to-mobile/error";
     public static final String M2S_LOOMO_DISMISSAL = "mobile-to-server/loomo-dismissal";
     public static final String M2S_BEACON_SIGNALS = "mobile-to-server/beacon-signals";
     public static final String M2S_GET_MAP_DESTINATIONS = "mobile-to-server/get-map-destinations";
-//    public static final String M2S_USER_DESTINATION = "mobile-to-server/user-destination";
 
     public static final String DEFAULT_DESTINATION = "Please select a destination";
 
