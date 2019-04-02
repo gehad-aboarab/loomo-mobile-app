@@ -150,15 +150,13 @@ public class MainActivity extends Activity {
                         Log.d(TAG, "inside route"+mqttMessage.toString());
                         try {
                             JSONArray destinations = obj.getJSONArray("destinations");
-                            if(application.destinations.size() == 0) {
-                                application.destinations.clear();
-                                for (int i = 0; i < destinations.length(); i++) {
-                                    String name = destinations.getJSONObject(i).getString("name");
-                                    application.destinations.add(name);
-                                }
-                                Collections.sort(application.destinations, String.CASE_INSENSITIVE_ORDER);
-                                initDestinationsSpinner();
+                            application.destinations.clear();
+                            for (int i = 0; i < destinations.length(); i++) {
+                                String name = destinations.getJSONObject(i).getString("name");
+                                application.destinations.add(name);
                             }
+                            Collections.sort(application.destinations, String.CASE_INSENSITIVE_ORDER);
+                            initDestinationsSpinner();
                         } catch(Exception e){
                             Log.d(TAG, "messageArrived Error: "+e.getMessage());
                         }
