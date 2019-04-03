@@ -31,7 +31,7 @@ public class ScanningBLE {
     private String mode;
     private boolean scanningStopped;
 
-    private static final String TAG = "SeniorSucks_Scan";
+    private static final String TAG = "SeniorSucks_Scanning";
     private static final long SCAN_PERIOD = 5000;
 
     public ScanningBLE(BluetoothLeScanner scanner, App application, ServiceInteractionListener mListener, String destination, int mode){
@@ -41,12 +41,10 @@ public class ScanningBLE {
         leDeviceList = new LeDeviceList();
         this.mListener = mListener;
         this.destination = destination;
-        switch(mode){
-            case 1:
-                this.mode = "ride";
-                break;
-            default:
-                this.mode = "guide";
+        if(mode == application.GUIDE_MODE) {
+            this.mode = "guide";
+        } else if(mode == application.RIDE_MODE){
+            this.mode = "ride";
         }
         scanningStopped = false;
         scanLeDevice(true);
@@ -84,7 +82,7 @@ public class ScanningBLE {
     }
 
     public void validLocation(){
-        if (leDeviceList.getCount() >= 3) {
+        if (leDeviceList.getCount() >= 1) {
             //Connection to server
             MqttMessage msg = new MqttMessage();
             JSONObject obj = new JSONObject();

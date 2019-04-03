@@ -37,18 +37,24 @@ public class App extends Application {
     public static final String S2M_LOOMO_ARRIVAL = "server-to-mobile/loomo-arrival";
     public static final String S2M_GET_MAP_DESTINATIONS = "server-to-mobile/get-map-destinations";
     public static final String S2M_LOOMO_DISMISS = "server-to-mobile/loomo-dismiss";
+    public static final String S2M_JOURNEY_STARTED = "server-to-mobile/started-journey";
+    public static final String S2M_JOURNEY_ENDED = "server-to-mobile/end-journey";
     public static final String S2M_ERROR = "server-to-mobile/error";
-    public static final String M2S_LOOMO_DISMISSAL = "mobile-to-server/loomo-dismissal";
+    public static final String M2S_LOOMO_DISMISSAL = "mobile-to-server/loomo-dismiss";
     public static final String M2S_BEACON_SIGNALS = "mobile-to-server/beacon-signals";
     public static final String M2S_GET_MAP_DESTINATIONS = "mobile-to-server/get-map-destinations";
+    public static final String M2S_START_JOURNEY = "mobile-to-server/start-journey";
 
     public static final String DEFAULT_DESTINATION = "Please select a destination";
+
+    public static final int GUIDE_MODE = 1;
+    public static final int RIDE_MODE = 0;
 
     public String deviceId;
     public String loomoId;
     public MqttHelper mqttHelper;
     public boolean usingLoomo = false;
-    public String mapName = "SampleMap";
+    public String mapName = "EB1-Rotunda";
     public ArrayList<String> destinations;
     private final String TAG = "SeniorSucks_App";
 
