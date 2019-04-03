@@ -21,7 +21,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 
 public class MainActivity extends Activity {
@@ -44,12 +43,11 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         application = (App) getApplication();
 
-        callLoomoButton = (Button) findViewById(R.id.main_callButton);
-        destinationSpinner = (Spinner) findViewById(R.id.main_destinationSpinner);
         radioGroup = (RadioGroup) findViewById(R.id.main_radioGroup);
         rideRadioButton = (RadioButton) findViewById(R.id.main_rideRadioButton);
         guideRadioButton = (RadioButton) findViewById(R.id.main_guideRadioButton);
         destinationSpinner = (Spinner) findViewById(R.id.main_destinationSpinner);
+        callLoomoButton = (Button) findViewById(R.id.main_callButton);
 
         if (application.usingLoomo) {
             intent = new Intent(getApplicationContext(), SuccessActivity.class);
@@ -77,12 +75,12 @@ public class MainActivity extends Activity {
                         String selectedDestination = destinationSpinner.getSelectedItem().toString();
                         intent = new Intent(getApplicationContext(), LoadingActivity.class);
                         intent.putExtra("destination", selectedDestination);
-                        intent.putExtra("mode", 0); //guide mode
+                        intent.putExtra("mode", application.GUIDE_MODE);
                         intent.putExtra("status", "request journey");
                         startActivity(intent);
                     } else if (rideRadioButton.isChecked()) {
                         intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                        intent.putExtra("mode", 1); //ride mode
+                        intent.putExtra("mode", application.RIDE_MODE);
                         intent.putExtra("status", "request journey");
                         startActivity(intent);
                     }
@@ -147,7 +145,7 @@ public class MainActivity extends Activity {
                 String clientId = obj.get("clientID").toString();
                 if (clientId.equals(application.deviceId)) {
                     if (topic.equals(application.S2M_GET_MAP_DESTINATIONS)) {
-                        Log.d(TAG, "inside route"+mqttMessage.toString());
+                        Log.d(TAG, "inside route" + mqttMessage.toString());
                         try {
                             JSONArray destinations = obj.getJSONArray("destinations");
                             application.destinations.clear();
@@ -162,12 +160,6 @@ public class MainActivity extends Activity {
                         }
 
                     }
-
-
-//                    } else if (topic.equals(mobApp.S2M_ERROR)) {
-//                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
-//                        finish();
-//                    }
                 }
 
             }

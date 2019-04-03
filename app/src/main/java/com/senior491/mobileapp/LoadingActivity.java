@@ -86,7 +86,7 @@ public class LoadingActivity extends Activity {
 
         Intent intent = getIntent();
         destination = intent.getStringExtra("destination");
-        mode = intent.getIntExtra("mode",0);
+        mode = intent.getIntExtra("mode",application.GUIDE_MODE);
         status = getIntent().getStringExtra("status");
 
         //GUI initializations
@@ -122,7 +122,6 @@ public class LoadingActivity extends Activity {
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
-                application.usingLoomo = false;
 
             } else if(scanningBLE.isScanning()) {
                 scanningBLE.stopScan();
@@ -144,6 +143,8 @@ public class LoadingActivity extends Activity {
                 }
             }
         }
+        application.loomoId = null;
+        application.usingLoomo = false;
         finish();
     }
 
@@ -262,6 +263,7 @@ public class LoadingActivity extends Activity {
                 } else if (topic.equals(application.S2M_LOOMO_ARRIVAL)) {
                     application.usingLoomo = true;
                     Intent intent = new Intent(getApplicationContext(), SuccessActivity.class);
+                    intent.putExtra("mode", mode);
                     startActivity(intent);
 
                 } else if (topic.equals(application.S2M_LOOMO_DISMISS)) {
