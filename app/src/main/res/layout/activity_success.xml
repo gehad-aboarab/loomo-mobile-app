@@ -8,12 +8,12 @@
     tools:context=".SuccessActivity">
 
     <TextView
-        android:id="@+id/goTextView"
+        android:id="@+id/success_textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="64dp"
         android:fontFamily="serif"
         android:text="Let's go, hop on!"
         android:textColor="#fff"
@@ -23,7 +23,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/success_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="8dp"
@@ -31,21 +31,36 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:src="@drawable/loomo_3"
-        app:layout_constraintBottom_toTopOf="@+id/okButton"
+        app:layout_constraintBottom_toTopOf="@+id/success_okButton"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/goTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/success_textView" />
 
     <Button
-        android:id="@+id/okButton"
+        android:id="@+id/success_okButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="Start Journey"
+        app:layout_constraintBottom_toTopOf="@+id/success_dismissButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/success_image"
+        tools:layout_editor_absoluteY="412dp" />
+
+    <Button
+        android:id="@+id/success_dismissButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="Let's Go"
+        android:text="Dismiss Loomo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/success_okButton" />
 
 </android.support.constraint.ConstraintLayout>

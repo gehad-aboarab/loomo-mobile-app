@@ -266,6 +266,11 @@ public class LoadingActivity extends Activity {
                     intent.putExtra("mode", mode);
                     startActivity(intent);
 
+                }  else if (topic.equals(application.S2M_JOURNEY_ENDED)){
+                    Intent intent = new Intent(getApplicationContext(), SuccessActivity.class);
+                    intent.putExtra("mode", -1);
+                    startActivity(intent);
+
                 } else if (topic.equals(application.S2M_LOOMO_DISMISS)) {
                     dismissLoomo(true);
 
