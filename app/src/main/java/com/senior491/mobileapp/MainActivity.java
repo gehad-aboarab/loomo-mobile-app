@@ -4,14 +4,23 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.provider.FontsContract;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -110,6 +119,24 @@ public class MainActivity extends Activity {
                 }
             }
         });
+
+        // when a spinner item is selected, changes the font of the textview to the proper font
+//        // and centers the text
+//        destinationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                TextView textView = (TextView) view;
+//                textView.setTypeface(Typeface.create("sans-serif-condensed-light", Typeface.NORMAL));
+//                textView.setTextColor(Color.WHITE);
+//                textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+//                textView.setGravity(Gravity.CENTER);
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
     }
 
     @Override
@@ -148,7 +175,23 @@ public class MainActivity extends Activity {
         destinationNames = new ArrayList<>();
         destinationNames.add(application.DEFAULT_DESTINATION);
         destinationNames.addAll(application.destinations);
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, destinationNames);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, destinationNames) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                TextView textView = (TextView) super.getView(position, convertView, parent);
+                textView.setTypeface(Typeface.create("sans-serif-condensed-light", Typeface.NORMAL));
+                textView.setTextColor(Color.WHITE);
+                textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                textView.setGravity(Gravity.CENTER);
+                return textView;
+            }
+
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                return super.getDropDownView(position, convertView, parent);
+            }
+        };
 //        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         destinationSpinner.setAdapter(spinnerArrayAdapter);

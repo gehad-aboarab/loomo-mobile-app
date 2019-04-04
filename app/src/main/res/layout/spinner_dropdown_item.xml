@@ -6,6 +6,7 @@
     android:fontFamily="sans-serif-condensed-light"
     android:gravity="center"
     android:singleLine="true"
-    android:textAlignment="center">
+    android:textAlignment="center"
+    android:textColor="@android:color/white">
 
 </CheckedTextView>
