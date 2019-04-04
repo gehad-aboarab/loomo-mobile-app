@@ -156,6 +156,8 @@ public class SuccessActivity extends Activity {
                     } else if (topic.equals(application.S2M_ERROR)) {
                         Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
                         finish();
+                    } else if (topic.equals(application.S2M_LOOMO_DISMISS)) {
+                        dismissLoomo(true);
                     }
                 }
             }
