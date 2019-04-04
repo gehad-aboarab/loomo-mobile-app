@@ -1,6 +1,5 @@
 package com.senior491.mobileapp;
 
-import android.app.Application;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -8,7 +7,6 @@ import android.bluetooth.le.ScanResult;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -95,7 +93,7 @@ public class ScanningBLE {
                     signalsArray.put(signals);
                 }
 
-                obj.put("clientID", application.deviceId);
+                obj.put("clientID", application.clientId);
                 obj.put("beaconSignals", signalsArray);
                 obj.put("destination", destination);
                 obj.put("mode", mode);

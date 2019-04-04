@@ -1,7 +1,9 @@
 package com.senior491.mobileapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,13 +37,17 @@ public class SuccessActivity extends Activity {
         successTextView = (TextView) findViewById(R.id.success_textView);
         okButton = (Button) findViewById(R.id.success_okButton);
         dismissButton = (Button) findViewById(R.id.success_dismissButton);
-        destinationMethod = getIntent().getIntExtra("mode", application.GUIDE_MODE);
 
+        // Get the destination mode from the shared prefs
+        SharedPreferences sp = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE);
+        destinationMethod = sp.getInt("mode", -1);
+
+        // Displaying the appropriate text depending on the mode
         if(destinationMethod == application.RIDE_MODE)
             successTextView.setText("Let's go, hop onto Loomo!");
         else if(destinationMethod == application.GUIDE_MODE)
             successTextView.setText("Let's go, follow Loomo!");
-        else{
+        else {
             successTextView.setText("Journey has ended, you can dismiss Loomo now.");
             okButton.setVisibility(View.GONE);
         }
@@ -49,10 +55,11 @@ public class SuccessActivity extends Activity {
         okButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Sending the server the start journey command
                 MqttMessage msg = new MqttMessage();
                 JSONObject obj = new JSONObject();
                 try {
-                    obj.put("clientID", application.deviceId);
+                    obj.put("clientID", application.clientId);
                     obj.put("loomoID", application.loomoId);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -77,11 +84,12 @@ public class SuccessActivity extends Activity {
     }
 
     public void dismissLoomo(boolean serverCommand) {
+        // If not a server command, inform server to dismiss
         if(!serverCommand) {
                 MqttMessage msg = new MqttMessage();
                 JSONObject obj = new JSONObject();
                 try {
-                    obj.put("clientID", application.deviceId);
+                    obj.put("clientID", application.clientId);
                     obj.put("loomoID", application.loomoId);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -94,8 +102,13 @@ public class SuccessActivity extends Activity {
                     e.printStackTrace();
                 }
         }
+
+        // Update loomoId and current state + shared prefs
         application.loomoId = null;
-        application.usingLoomo = false;
+        application.currentState = application.UNBOUND;
+        updateSharedPrefs();
+
+        // Go back to main activity
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
@@ -106,6 +119,15 @@ public class SuccessActivity extends Activity {
     protected void onResume() {
         super.onResume();
         startMqtt();
+    }
+
+    public void updateSharedPrefs() {
+        SharedPreferences.Editor editor = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
+        editor.putString("loomoId", application.loomoId);
+        editor.putInt("currentState", application.currentState);
+        editor.putString("destination", null);
+        editor.putInt("mode", -100);
+        editor.commit();
     }
 
     private void startMqtt(){
@@ -121,17 +143,20 @@ public class SuccessActivity extends Activity {
 
             @Override
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-                Log.w(TAG, mqttMessage.toString());
-                if (topic.equals(application.S2M_JOURNEY_STARTED)) {
-                    Intent intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.putExtra("status", "ongoing journey");
-                    startActivity(intent);
-                    finish();
+                JSONObject obj = new JSONObject(mqttMessage.toString());
+                if (obj.get("clientID").toString().equals(application.clientId)) {
+                    Log.w(TAG, mqttMessage.toString());
 
-                } else if (topic.equals(application.S2M_ERROR)) {
-                    Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
-                    finish();
+                    if (topic.equals(application.S2M_JOURNEY_STARTED)) {
+                        // If journey has been started, go to loading activity
+                        Intent intent = new Intent(getApplicationContext(), LoadingActivity.class);
+                        startActivity(intent);
+                        finish();
+
+                    } else if (topic.equals(application.S2M_ERROR)) {
+                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
                 }
             }
         });

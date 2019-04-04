@@ -13,8 +13,6 @@ import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MqttHelper {
@@ -31,32 +29,8 @@ public class MqttHelper {
     public MqttHelper(Application app) {
         Context context = app.getApplicationContext();
         mobApp = (App) app;
-        clientId = mobApp.deviceId;
+        clientId = mobApp.clientId;
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
-        mqttAndroidClient.setCallback(new MqttCallbackExtended() {
-            @Override
-            public void connectComplete(boolean b, String s) { Log.w(TAG, s); }
-            @Override
-            public void connectionLost(Throwable throwable) { }
-            @Override
-            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-                Log.w(TAG, mqttMessage.toString());
-                JSONObject obj = new JSONObject(mqttMessage.toString());
-                String clientId = obj.get("clientID").toString();
-                if (clientId.equals(mobApp.deviceId)) {
-//                    } else if (topic.equals(mobApp.S2M_ERROR)) {
-//                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
-//                        finish();
-//                    }
-                }
-
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-
-            }
-        });
         connect();
     }
 
