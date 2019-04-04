@@ -149,7 +149,8 @@ public class MainActivity extends Activity {
         destinationNames.add(application.DEFAULT_DESTINATION);
         destinationNames.addAll(application.destinations);
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, destinationNames);
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         destinationSpinner.setAdapter(spinnerArrayAdapter);
     }
 
