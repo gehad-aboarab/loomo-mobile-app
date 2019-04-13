@@ -119,24 +119,6 @@ public class MainActivity extends Activity {
                 }
             }
         });
-
-        // when a spinner item is selected, changes the font of the textview to the proper font
-//        // and centers the text
-//        destinationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                TextView textView = (TextView) view;
-//                textView.setTypeface(Typeface.create("sans-serif-condensed-light", Typeface.NORMAL));
-//                textView.setTextColor(Color.WHITE);
-//                textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-//                textView.setGravity(Gravity.CENTER);
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
     }
 
     @Override
@@ -146,12 +128,12 @@ public class MainActivity extends Activity {
         // Retrieve the updated destinations from the map
         application.destinations.clear();
         if(application.mqttHelper.mqttAndroidClient.isConnected()){
-            getUpdatedDestinations(application.mapName);
+            getUpdatedSpinners(application.mapName);
         }
         startMqtt();
     }
 
-    private void getUpdatedDestinations(String mapName){
+    private void getUpdatedSpinners(String mapName){
         // Ask the server to send the updated map
         MqttMessage msg = new MqttMessage();
         JSONObject obj = new JSONObject();
@@ -164,7 +146,9 @@ public class MainActivity extends Activity {
         msg.setPayload(obj.toString().getBytes());
         Log.d(TAG, msg.toString());
         try {
+            // getting tours and destinations
             application.mqttHelper.mqttAndroidClient.publish(application.M2S_GET_MAP_DESTINATIONS, msg);
+            application.mqttHelper.mqttAndroidClient.publish(application.M2S_GET_TOURS, msg);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -197,10 +181,14 @@ public class MainActivity extends Activity {
         destinationSpinner.setAdapter(spinnerArrayAdapter);
     }
 
+    private void initToursSpinner(){
+        //TODO Tours spinner logic here
+    }
+
     private void startMqtt(){
         application.mqttHelper.setCallback(new MqttCallbackExtended() {
             @Override
-            public void connectComplete(boolean b, String s) { getUpdatedDestinations(application.mapName); }
+            public void connectComplete(boolean b, String s) { getUpdatedSpinners(application.mapName); }
             @Override
             public void connectionLost(Throwable throwable) {}
             @Override
@@ -227,6 +215,16 @@ public class MainActivity extends Activity {
                             initDestinationsSpinner();
 
                         } catch(Exception e){
+                            Log.d(TAG, "messageArrived Error: "+e.getMessage());
+                        }
+                    } else if(topic.equals(application.S2M_GET_TOURS)) {
+                        try {
+                            JSONObject tour = obj.getJSONObject("tour");
+                            application.tours.clear();
+                            application.tours.add(tour.getString("tourName"));
+                            initToursSpinner();
+                        } catch(Exception e){
+                            // No tours available
                             Log.d(TAG, "messageArrived Error: "+e.getMessage());
                         }
                     }

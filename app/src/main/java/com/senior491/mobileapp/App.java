@@ -29,6 +29,7 @@ public class App extends Application {
     public static final String S2M_LOOMO_STATUS = "server-to-mobile/loomo-status";
     public static final String S2M_LOOMO_ARRIVAL = "server-to-mobile/loomo-arrival";
     public static final String S2M_GET_MAP_DESTINATIONS = "server-to-mobile/get-map-destinations";
+    public static final String S2M_GET_TOURS = "server-to-mobile/get-tours";
     public static final String S2M_LOOMO_DISMISS = "server-to-mobile/loomo-dismiss";
     public static final String S2M_JOURNEY_STARTED = "server-to-mobile/started-journey";
     public static final String S2M_JOURNEY_ENDED = "server-to-mobile/end-journey";
@@ -36,6 +37,7 @@ public class App extends Application {
     public static final String M2S_LOOMO_DISMISSAL = "mobile-to-server/loomo-dismiss";
     public static final String M2S_BEACON_SIGNALS = "mobile-to-server/beacon-signals";
     public static final String M2S_GET_MAP_DESTINATIONS = "mobile-to-server/get-map-destinations";
+    public static final String M2S_GET_TOURS = "mobile-to-server/get-tours";
     public static final String M2S_START_JOURNEY = "mobile-to-server/start-journey";
     public static final String DEFAULT_DESTINATION = "Please select a destination";
     public static final String TAG = "SeniorSucks_App";
@@ -53,8 +55,9 @@ public class App extends Application {
     public String loomoId;
     public int currentState;
     public MqttHelper mqttHelper;
-    public String mapName = "EB1-Rotunda";
+    public String mapName = "EB2-Rotunda";
     public ArrayList<String> destinations;
+    public ArrayList<String> tours;
 //    public boolean usingLoomo = false;
 
     @Override
@@ -64,6 +67,7 @@ public class App extends Application {
         clientId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         Log.d(TAG, "My device ID: " + clientId);
         destinations = new ArrayList<>();
+        tours = new ArrayList<>();
 
         SharedPreferences sp = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         loomoId = sp.getString("loomoId",null);
