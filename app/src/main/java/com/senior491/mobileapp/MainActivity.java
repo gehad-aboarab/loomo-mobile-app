@@ -21,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cooltechworks.views.ScratchImageView;
 import com.ebanx.swipebtn.OnActiveListener;
 import com.ebanx.swipebtn.SwipeButton;
 
@@ -46,6 +47,8 @@ public class MainActivity extends Activity {
     private RadioButton tourRadioButton, rideRadioButton, guideRadioButton;
     private TextView destinationsLabel, toursLabel;
 
+    private ScratchImageView loomoImage;
+
     private Intent intent;
     private App application;
     private ArrayList<String> destinationNames;
@@ -70,6 +73,18 @@ public class MainActivity extends Activity {
         toursSpinner = (Spinner) findViewById(R.id.main_toursSpinner);
         //callLoomoButton = (Button) findViewById(R.id.main_callButton);
         callLoomoButton = (SwipeButton) findViewById(R.id.main_callButton);
+        loomoImage = (ScratchImageView) findViewById(R.id.main_loomoImage);
+        loomoImage.setRevealListener(new ScratchImageView.IRevealListener() {
+            @Override
+            public void onRevealed(ScratchImageView iv) { }
+            @Override
+            public void onRevealPercentChangedListener(ScratchImageView siv, float percent) {
+                if(percent>0.4f){
+                    Toasty.success(getApplicationContext(),"You found loomo!!!",Toasty.LENGTH_SHORT,true).show();
+                    siv.clear();
+                }
+            }
+        });
 
         // View the appropriate spinner (or no spinner) based on the selected mode
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
