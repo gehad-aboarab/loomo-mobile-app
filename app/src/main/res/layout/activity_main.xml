@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#a8a8a8"
-    tools:context=".DestinationActivity">
+    tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/main_destinationMethodLabel"
@@ -14,7 +14,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="8dp"
-        android:fontFamily="sans-serif-condensed-light"
+        android:fontFamily="sans-serif-condensed"
         android:text="How would you like to go?"
         android:textColor="#fff"
         android:textSize="14sp"
@@ -36,14 +36,14 @@
         app:layout_constraintTop_toBottomOf="@+id/main_destinationMethodLabel">
 
         <RadioButton
-            android:id="@+id/main_rideRadioButton"
+            android:id="@+id/main_tourRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="10dp"
             android:layout_weight="1"
-            android:checked="false"
-            android:fontFamily="sans-serif-condensed-light"
-            android:text="Ride Loomo"
+            android:checked="true"
+            android:fontFamily="sans-serif-condensed"
+            android:text="Take a tour"
             android:textColor="#fff"
             android:textSize="14sp" />
 
@@ -51,14 +51,55 @@
             android:id="@+id/main_guideRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
             android:layout_weight="1"
-            android:checked="true"
-            android:fontFamily="sans-serif-condensed-light"
+            android:fontFamily="sans-serif-condensed"
             android:text="Guided by Loomo"
             android:textColor="#fff"
             android:textSize="14sp" />
 
+        <RadioButton
+            android:id="@+id/main_rideRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="false"
+            android:fontFamily="sans-serif-condensed"
+            android:text="Ride Loomo"
+            android:textColor="#fff"
+            android:textSize="14sp" />
     </RadioGroup>
+
+    <TextView
+        android:id="@+id/main_toursLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="sans-serif-condensed"
+        android:text="Please select a tour"
+        android:textColor="#fff"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_radioGroup" />
+
+    <Spinner
+        android:id="@+id/main_toursSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="serif"
+        android:gravity="center"
+        android:popupBackground="@color/spinner_item_background"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_toursLabel" />
 
     <TextView
         android:id="@+id/main_destinationLabel"
@@ -67,9 +108,10 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="8dp"
-        android:fontFamily="sans-serif-condensed-light"
+        android:fontFamily="sans-serif-condensed"
         android:text="Where would you like to go?"
         android:textColor="#fff"
+        android:visibility="gone"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
@@ -87,6 +129,7 @@
         android:gravity="center"
         android:popupBackground="@color/spinner_item_background"
         android:textColor="@android:color/white"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/main_destinationLabel" />
@@ -94,16 +137,14 @@
     <ImageView
         android:id="@+id/main_loomoImage"
         android:layout_width="409dp"
-        android:layout_height="401dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="301dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_weight="1"
         android:src="@drawable/loomo_3"
         app:layout_constraintBottom_toTopOf="@+id/main_callButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/main_destinationSpinner" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/main_callButton"

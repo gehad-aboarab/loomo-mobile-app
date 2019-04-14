@@ -40,8 +40,10 @@ public class App extends Application {
     public static final String M2S_GET_TOURS = "mobile-to-server/get-tours";
     public static final String M2S_START_JOURNEY = "mobile-to-server/start-journey";
     public static final String DEFAULT_DESTINATION = "Please select a destination";
+    public static final String DEFAULT_TOUR = "Please select a tour";
     public static final String TAG = "SeniorSucks_App";
 
+    public static final int TOUR_MODE = 2;
     public static final int GUIDE_MODE = 1;
     public static final int RIDE_MODE = 0;
 
@@ -53,12 +55,17 @@ public class App extends Application {
 
     public String clientId;
     public String loomoId;
+
     public int currentState;
+    public int currentMode;
+    public String currentDestination;
+    public String currentTour;
+
     public MqttHelper mqttHelper;
     public String mapName = "EB2-Rotunda";
+    public String tourName = "EB2-Rotunda";
     public ArrayList<String> destinations;
     public ArrayList<String> tours;
-//    public boolean usingLoomo = false;
 
     @Override
     public void onCreate() {
@@ -79,6 +86,41 @@ public class App extends Application {
 
         mqttHelper = new MqttHelper(this);
 
+    }
+
+    public void updateCurrentMode(int mode){
+        currentMode = mode;
+        SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
+        editor.putInt("mode", currentMode);
+        editor.commit();
+    }
+
+    public void updateCurrentDestination(String destination){
+        currentDestination = destination;
+        SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
+        editor.putString("destination", currentDestination);
+        editor.commit();
+    }
+
+    public void updateCurrentTour(String tour){
+        currentTour = tour;
+        SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
+        editor.putString("tour", currentTour);
+        editor.commit();
+    }
+
+    public void updateCurrentState(int state){
+        currentState = state;
+        SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
+        editor.putInt("state", currentState);
+        editor.commit();
+    }
+
+    public void updateLoomoId(String loomoId){
+        this.loomoId = loomoId;
+        SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
+        editor.putString("loomoId", this.loomoId);
+        editor.commit();
     }
 
 }

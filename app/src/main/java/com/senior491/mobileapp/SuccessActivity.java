@@ -19,12 +19,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class SuccessActivity extends Activity {
-
-    private String status;
     private TextView successTextView;
     private Button okButton;
     private Button dismissButton;
-    private int destinationMethod;
     private App application;
     private final static String TAG = "SeniorSucks_Success";
 
@@ -38,18 +35,19 @@ public class SuccessActivity extends Activity {
         okButton = (Button) findViewById(R.id.success_okButton);
         dismissButton = (Button) findViewById(R.id.success_dismissButton);
 
-        // Get the destination mode from the shared prefs
-        SharedPreferences sp = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        destinationMethod = sp.getInt("mode", -1);
-
         // Displaying the appropriate text depending on the mode
-        if(destinationMethod == application.RIDE_MODE)
-            successTextView.setText("Let's go, hop onto Loomo!");
-        else if(destinationMethod == application.GUIDE_MODE)
-            successTextView.setText("Let's go, follow Loomo!");
-        else {
+        if (application.currentState == application.BOUND_JOURNEY_ENDED) {
             successTextView.setText("Journey has ended, you can dismiss Loomo now.");
             okButton.setVisibility(View.GONE);
+        } else if (application.currentMode == application.RIDE_MODE) {
+            successTextView.setText("Let's go, hop onto Loomo!");
+            okButton.setText("Transform Loomo");
+        } else if (application.currentMode == application.GUIDE_MODE) {
+            successTextView.setText("Let's go, follow Loomo!");
+            okButton.setText("Start Journey");
+        } else if(application.currentMode == application.GUIDE_MODE) {
+            successTextView.setText("Let's go, follow Loomo!");
+            okButton.setText("Start Tour");
         }
 
         okButton.setOnClickListener(new View.OnClickListener() {
@@ -103,10 +101,9 @@ public class SuccessActivity extends Activity {
                 }
         }
 
-        // Update loomoId and current state + shared prefs
-        application.loomoId = null;
-        application.currentState = application.UNBOUND;
-        updateSharedPrefs();
+        // Update loomoId and current state
+        application.updateLoomoId(null);
+        application.updateCurrentState(application.UNBOUND);
 
         // Go back to main activity
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -118,16 +115,13 @@ public class SuccessActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences sp = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE);
+        application.currentDestination = sp.getString("destination", null);
+        application.currentTour = sp.getString("tour", null);
+        application.currentMode = sp.getInt("mode", application.GUIDE_MODE);
+        application.currentState = sp.getInt("state", application.UNBOUND);
+        application.loomoId = sp.getString("loomoId", null);
         startMqtt();
-    }
-
-    public void updateSharedPrefs() {
-        SharedPreferences.Editor editor = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
-        editor.putString("loomoId", application.loomoId);
-        editor.putInt("currentState", application.currentState);
-        editor.putString("destination", null);
-        editor.putInt("mode", -100);
-        editor.commit();
     }
 
     private void startMqtt(){
@@ -149,8 +143,9 @@ public class SuccessActivity extends Activity {
 
                     if (topic.equals(application.S2M_JOURNEY_STARTED)) {
                         // If journey has been started, go to loading activity
+                        application.updateCurrentState(application.BOUND_ONGOING_JOURNEY);
                         Intent intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                        startActivity(intent);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         finish();
 
                     } else if (topic.equals(application.S2M_ERROR)) {

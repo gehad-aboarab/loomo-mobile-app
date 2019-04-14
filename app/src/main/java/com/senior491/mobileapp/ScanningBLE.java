@@ -25,24 +25,25 @@ public class ScanningBLE {
     private boolean mScanning;
     private App application;
     private ServiceInteractionListener mListener;
-    private String destination;
     private String mode;
     private boolean scanningStopped;
 
     private static final String TAG = "SeniorSucks_Scanning";
     private static final long SCAN_PERIOD = 5000;
 
-    public ScanningBLE(BluetoothLeScanner scanner, App application, ServiceInteractionListener mListener, String destination, int mode){
+    public ScanningBLE(BluetoothLeScanner scanner, App application, ServiceInteractionListener mListener){
         bluetoothScanner = scanner;
         this.application = application;
         handler = new Handler();
         leDeviceList = new LeDeviceList();
         this.mListener = mListener;
-        this.destination = destination;
-        if(mode == application.GUIDE_MODE) {
+
+        if(application.currentMode == application.GUIDE_MODE) {
             this.mode = "guide";
-        } else if(mode == application.RIDE_MODE){
+        } else if(application.currentMode == application.RIDE_MODE){
             this.mode = "ride";
+        } else if(application.currentMode == application.TOUR_MODE){
+            this.mode = "tour";
         }
         scanningStopped = false;
         scanLeDevice(true);
@@ -95,7 +96,9 @@ public class ScanningBLE {
 
                 obj.put("clientID", application.clientId);
                 obj.put("beaconSignals", signalsArray);
-                obj.put("destination", destination);
+                obj.put("mapName", application.mapName);
+                obj.put("destination", application.currentDestination);
+                obj.put("tour", application.currentTour);
                 obj.put("mode", mode);
             } catch (JSONException e) {
                 e.printStackTrace();

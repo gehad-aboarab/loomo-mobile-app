@@ -30,7 +30,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class LoadingActivity extends Activity {
-
     private ProgressBar progressBar;
     private TextView statusTextView;
     private Button dismissButton;
@@ -38,8 +37,6 @@ public class LoadingActivity extends Activity {
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
     private App application;
-    private String destination;
-    private int mode;
     private Timer timer;
     private boolean loomoStatusReceived;
     private ScanningBLE scanningBLE;
@@ -84,7 +81,7 @@ public class LoadingActivity extends Activity {
         setContentView(R.layout.activity_loading);
         application = (App) getApplication();
 
-        //GUI initializations
+        // GUI initializations
         progressBar = (ProgressBar) findViewById(R.id.loading_progress);
         statusTextView = (TextView) findViewById(R.id.loading_status);
         dismissButton = (Button) findViewById(R.id.loading_dismissLoomo);
@@ -140,11 +137,12 @@ public class LoadingActivity extends Activity {
             }
         }
 
-        // Update loomoId and current state + shared prefs
-        application.loomoId = null;
-        application.currentState = application.UNBOUND;
-        updateSharedPrefs();
+        // Update loomoId and current state
+        application.updateLoomoId(null);
+        application.updateCurrentState(application.UNBOUND);
 
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         finish();
     }
 
@@ -152,6 +150,13 @@ public class LoadingActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "On resume called.");
+
+        SharedPreferences sp = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE);
+        application.currentDestination = sp.getString("destination", null);
+        application.currentTour = sp.getString("tour", null);
+        application.currentMode = sp.getInt("mode", application.GUIDE_MODE);
+        application.currentState = sp.getInt("state", application.UNBOUND);
+        application.loomoId = sp.getString("loomoId", null);
 
         // Bluetooth permissions and initializations
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -213,18 +218,19 @@ public class LoadingActivity extends Activity {
     @Override
     protected void onPause() {
         Log.d(TAG, "On pause called.");
-        updateSharedPrefs();
         super.onPause();
     }
 
-    public void updateSharedPrefs() {
-        SharedPreferences.Editor editor = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
-        editor.putString("loomoId", application.loomoId);
-        editor.putInt("currentState", application.currentState);
-        editor.putString("destination", destination);
-        editor.putInt("mode", mode);
-        editor.commit();
-    }
+
+//    public void updateSharedPrefs() {
+//        SharedPreferences.Editor editor = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
+//        editor.putString("loomoId", application.loomoId);
+//        editor.putInt("state", application.currentState);
+//        editor.putString("destination", application.currentDestination);
+//        editor.putString("tour", application.currentTour);
+//        editor.putInt("mode", mode);
+//        editor.commit();
+//    }
 
     public void updateCurrentGUI() {
         if (application.currentState == application.UNBOUND) {
@@ -232,13 +238,8 @@ public class LoadingActivity extends Activity {
             statusTextView.setText(application.RETRIEVE_LOCATION);
             progressBar.setVisibility(View.VISIBLE);
 
-            // Check shared prefs for the destination and mode
-            SharedPreferences sp = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE);
-            destination = sp.getString("destination", null);
-            mode = sp.getInt("mode", application.GUIDE_MODE);
-
             // Start scanning for beacons
-            scanningBLE = new ScanningBLE(bluetoothAdapter.getBluetoothLeScanner(), application,mListener, destination, mode);
+            scanningBLE = new ScanningBLE(bluetoothAdapter.getBluetoothLeScanner(), application, mListener);
 
         } else if (application.currentState == application.BOUND_ONGOING_JOURNEY) {
             // Update the GUI
@@ -263,7 +264,6 @@ public class LoadingActivity extends Activity {
                 JSONObject obj = new JSONObject(mqttMessage.toString());
                 if (obj.get("clientID").toString().equals(application.clientId)) {
                     Log.w(TAG, mqttMessage.toString());
-                    Log.w(TAG, "topic: "+topic);
 
                     if (topic.equals(application.S2M_LOOMO_STATUS)) {
                         String loomoStatus = obj.get("status").toString();
@@ -271,11 +271,8 @@ public class LoadingActivity extends Activity {
 
                         if (loomoStatus.equals("available")) {
                             // Update the current state and store loomo id
-                            application.loomoId = obj.get("loomoID").toString();
-                            application.currentState = application.BOUND_WAITING;
-
-                            // Update shared prefs
-                            updateSharedPrefs();
+                            application.updateLoomoId(obj.get("loomoID").toString());
+                            application.updateCurrentState(application.BOUND_WAITING);
 
                             // Update the GUI
                             statusTextView.setText(application.LOOMO_AVAILABLE);
@@ -287,22 +284,19 @@ public class LoadingActivity extends Activity {
 
                     } else if (topic.equals(application.S2M_LOOMO_ARRIVAL)) {
                         // Update the current state and prefs
-                        application.currentState = application.BOUND_JOURNEY_STARTABLE;
-                        updateSharedPrefs();
+                        application.updateCurrentState(application.BOUND_JOURNEY_STARTABLE);
 
                         // Move to next activity
                         Intent intent = new Intent(getApplicationContext(), SuccessActivity.class);
-                        intent.putExtra("mode", mode);
                         startActivity(intent);
 
                     } else if (topic.equals(application.S2M_JOURNEY_ENDED)) {
                         // Update the current state and prefs
-                        application.currentState = application.BOUND_JOURNEY_ENDED;
-                        updateSharedPrefs();
+                        application.updateCurrentState(application.BOUND_JOURNEY_ENDED);
 
                         // Move to next activity and pass the mode as -1 to indicate end of journey
                         Intent intent = new Intent(getApplicationContext(), SuccessActivity.class);
-                        intent.putExtra("mode", -1);
+//                        intent.putExtra("mode", -1);
                         startActivity(intent);
 
                     } else if (topic.equals(application.S2M_LOOMO_DISMISS)) {

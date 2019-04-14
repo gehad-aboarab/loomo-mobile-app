@@ -29,7 +29,7 @@ public class MqttHelper {
     public MqttHelper(Application app) {
         Context context = app.getApplicationContext();
         mobApp = (App) app;
-        clientId = mobApp.clientId;
+        clientId = mobApp.clientId+"oip";
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
         connect();
     }
@@ -43,6 +43,7 @@ public class MqttHelper {
         mqttConnectOptions.setAutomaticReconnect(true);
         mqttConnectOptions.setCleanSession(false);
         mqttConnectOptions.setUserName(username);
+        mqttConnectOptions.setKeepAliveInterval(10);
         mqttConnectOptions.setPassword(password.toCharArray());
 
         try {

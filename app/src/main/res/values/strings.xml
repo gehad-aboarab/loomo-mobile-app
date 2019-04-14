@@ -27,6 +27,7 @@
     <string name="route_loomo_status">/loomo-status</string>
     <string name="route_loomo_arrival">/loomo-arrival</string>
 
-    <string name="error_no_destination_selected">Please select a valid destination</string>
+    <string name="error_no_destination_selected">Please select a valid destination, or change the mode of transportation</string>
+    <string name="error_no_tour_selected">Please select a valid tour, or change the mode of transportation</string>
 
 </resources>
