@@ -19,6 +19,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ebanx.swipebtn.OnActiveListener;
+import com.ebanx.swipebtn.SwipeButton;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -34,7 +37,8 @@ import es.dmoral.toasty.Toasty;
 public class LoadingActivity extends Activity {
     private ProgressBar progressBar;
     private TextView statusTextView;
-    private Button dismissButton;
+//    private Button dismissButton;
+    private SwipeButton dismissButton;
 
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
@@ -88,11 +92,19 @@ public class LoadingActivity extends Activity {
         // GUI initializations
         progressBar = (ProgressBar) findViewById(R.id.loading_progress);
         statusTextView = (TextView) findViewById(R.id.loading_status);
-        dismissButton = (Button) findViewById(R.id.loading_dismissLoomo);
+//        dismissButton = (Button) findViewById(R.id.loading_dismissLoomo);
+        dismissButton = (SwipeButton) findViewById(R.id.loading_dismissLoomo);
 
-        dismissButton.setOnClickListener(new View.OnClickListener() {
+
+//        dismissButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                dismissLoomo(false);
+//            }
+//        });
+        dismissButton.setOnActiveListener(new OnActiveListener() {
             @Override
-            public void onClick(View v) {
+            public void onActive() {
                 dismissLoomo(false);
             }
         });

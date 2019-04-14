@@ -24,9 +24,11 @@ dependencies {
     configurations.all {
         resolutionStrategy {
             force 'com.android.support:support-v4:27.1.0'
-        }}
+        }
+    }
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+    implementation 'com.ebanx:swipe-button:0.8.3'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.github.GrenderG:Toasty:1.4.2'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

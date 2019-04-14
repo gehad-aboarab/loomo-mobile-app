@@ -37,31 +37,88 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/success_textView" />
 
-    <Button
+    <!--<Button-->
+        <!--android:id="@+id/success_okButton"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:fontFamily="sans-serif-condensed"-->
+        <!--android:text="Start Journey"-->
+        <!--app:layout_constraintBottom_toTopOf="@+id/success_dismissButton"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/success_image" />-->
+    <com.ebanx.swipebtn.SwipeButton
         android:id="@+id/success_okButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:fontFamily="sans-serif-condensed"
-        android:text="Start Journey"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        app:inner_text="Start Journey"
+        app:inner_text_color="@android:color/white"
+        app:inner_text_size="20sp"
+        app:inner_text_top_padding="17dp"
+        app:inner_text_bottom_padding="17dp"
+        app:inner_text_background="@drawable/shape_rounded"
+        app:button_image_height="60dp"
+        app:button_image_width="100dp"
+        app:button_image_disabled="@drawable/start_journey"
+        app:button_image_enabled="@drawable/start_journey"
+        app:button_left_padding="20dp"
+        app:button_right_padding="20dp"
+        app:button_top_padding="20dp"
+        app:button_bottom_padding="20dp"
+        app:button_background="@drawable/shape_button"
+        app:initial_state="disabled"
+        app:has_activate_state="false"
         app:layout_constraintBottom_toTopOf="@+id/success_dismissButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/success_image" />
-
-    <Button
+        app:layout_constraintTop_toBottomOf="@+id/success_image"
+        />
+    <!--<Button-->
+        <!--android:id="@+id/success_dismissButton"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:fontFamily="sans-serif-condensed"-->
+        <!--android:text="Dismiss Loomo"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/success_okButton" />-->
+    <com.ebanx.swipebtn.SwipeButton
         android:id="@+id/success_dismissButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:fontFamily="sans-serif-condensed"
-        android:text="Dismiss Loomo"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        app:inner_text="Dismiss Loomo"
+        app:inner_text_color="@android:color/white"
+        app:inner_text_size="20sp"
+        app:inner_text_top_padding="17dp"
+        app:inner_text_bottom_padding="17dp"
+        app:inner_text_background="@drawable/shape_rounded"
+        app:button_image_height="60dp"
+        app:button_image_width="100dp"
+        app:button_image_disabled="@drawable/dismiss_loomo"
+        app:button_image_enabled="@drawable/dismiss_loomo"
+        app:button_left_padding="20dp"
+        app:button_right_padding="20dp"
+        app:button_top_padding="20dp"
+        app:button_bottom_padding="20dp"
+        app:button_background="@drawable/shape_button"
+        app:initial_state="disabled"
+        app:has_activate_state="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/success_okButton" />
+        app:layout_constraintTop_toBottomOf="@+id/success_okButton"
+        />
 
 </android.support.constraint.ConstraintLayout>

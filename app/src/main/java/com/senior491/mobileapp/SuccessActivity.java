@@ -11,6 +11,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ebanx.swipebtn.OnActiveListener;
+import com.ebanx.swipebtn.SwipeButton;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -22,8 +25,10 @@ import es.dmoral.toasty.Toasty;
 
 public class SuccessActivity extends Activity {
     private TextView successTextView;
-    private Button okButton;
-    private Button dismissButton;
+//    private Button okButton;
+    private SwipeButton okButton;
+//    private Button dismissButton;
+    private SwipeButton dismissButton;
     private App application;
     private final static String TAG = "SeniorSucks_Success";
 
@@ -34,8 +39,10 @@ public class SuccessActivity extends Activity {
 
         application = (App) getApplication();
         successTextView = (TextView) findViewById(R.id.success_textView);
-        okButton = (Button) findViewById(R.id.success_okButton);
-        dismissButton = (Button) findViewById(R.id.success_dismissButton);
+        okButton = (SwipeButton) findViewById(R.id.success_okButton);
+//        okButton = (Button) findViewById(R.id.success_okButton);
+        dismissButton = (SwipeButton) findViewById(R.id.success_dismissButton);
+//        dismissButton = (Button) findViewById(R.id.success_dismissButton);
 
         // Displaying the appropriate text depending on the mode
         if (application.currentState == application.BOUND_JOURNEY_ENDED) {
@@ -52,9 +59,31 @@ public class SuccessActivity extends Activity {
             okButton.setText("Start Tour");
         }
 
-        okButton.setOnClickListener(new View.OnClickListener() {
+//        okButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                // Sending the server the start journey command
+//                MqttMessage msg = new MqttMessage();
+//                JSONObject obj = new JSONObject();
+//                try {
+//                    obj.put("clientID", application.clientId);
+//                    obj.put("loomoID", application.loomoId);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                msg.setPayload(obj.toString().getBytes());
+//                Log.d(TAG, msg.toString());
+//                try {
+//                    application.mqttHelper.mqttAndroidClient.publish(application.M2S_START_JOURNEY, msg);
+//                } catch (MqttException e) {
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//        });
+        okButton.setOnActiveListener(new OnActiveListener() {
             @Override
-            public void onClick(View view) {
+            public void onActive() {
                 // Sending the server the start journey command
                 MqttMessage msg = new MqttMessage();
                 JSONObject obj = new JSONObject();
@@ -71,13 +100,18 @@ public class SuccessActivity extends Activity {
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
-
             }
         });
 
-        dismissButton.setOnClickListener(new View.OnClickListener() {
+//        dismissButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                dismissLoomo(false);
+//            }
+//        });
+        dismissButton.setOnActiveListener(new OnActiveListener() {
             @Override
-            public void onClick(View view) {
+            public void onActive() {
                 dismissLoomo(false);
             }
         });

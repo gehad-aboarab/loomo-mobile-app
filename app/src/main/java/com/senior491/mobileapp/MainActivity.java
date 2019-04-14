@@ -21,6 +21,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ebanx.swipebtn.OnActiveListener;
+import com.ebanx.swipebtn.SwipeButton;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -36,7 +39,8 @@ import es.dmoral.toasty.Toasty;
 
 public class MainActivity extends Activity {
 
-    private Button callLoomoButton;
+//    private Button callLoomoButton;
+    private SwipeButton callLoomoButton;
     private Spinner destinationSpinner, toursSpinner;
     private RadioGroup radioGroup;
     private RadioButton tourRadioButton, rideRadioButton, guideRadioButton;
@@ -64,7 +68,8 @@ public class MainActivity extends Activity {
         tourRadioButton = (RadioButton) findViewById(R.id.main_tourRadioButton);
         destinationSpinner = (Spinner) findViewById(R.id.main_destinationSpinner);
         toursSpinner = (Spinner) findViewById(R.id.main_toursSpinner);
-        callLoomoButton = (Button) findViewById(R.id.main_callButton);
+        //callLoomoButton = (Button) findViewById(R.id.main_callButton);
+        callLoomoButton = (SwipeButton) findViewById(R.id.main_callButton);
 
         // View the appropriate spinner (or no spinner) based on the selected mode
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -94,49 +99,91 @@ public class MainActivity extends Activity {
             }
         });
 
-        callLoomoButton.setOnClickListener(new View.OnClickListener() {
+        callLoomoButton.setOnActiveListener(new OnActiveListener() {
             @Override
-            public void onClick(View v) {
-                if (v.getId() == R.id.main_callButton) {
-                    // If user did not select a destination while on guide
-                    if ((destinationSpinner.getSelectedItem() == null || destinationSpinner.getSelectedItem().equals(application.DEFAULT_DESTINATION))&& guideRadioButton.isChecked()) {
-                        Toasty.warning(getApplicationContext(),R.string.error_no_destination_selected,Toast.LENGTH_SHORT,true).show();
-                        //Toast.makeText(getApplicationContext(), R.string.error_no_destination_selected, Toast.LENGTH_SHORT).show();
+            public void onActive() {
+                // If user did not select a destination while on guide
+                if ((destinationSpinner.getSelectedItem() == null || destinationSpinner.getSelectedItem().equals(application.DEFAULT_DESTINATION))&& guideRadioButton.isChecked()) {
+                    Toasty.warning(getApplicationContext(),R.string.error_no_destination_selected,Toast.LENGTH_SHORT,true).show();
+                    //Toast.makeText(getApplicationContext(), R.string.error_no_destination_selected, Toast.LENGTH_SHORT).show();
 
-                    // If user selected guide
-                    } else if (guideRadioButton.isChecked()) {
-                        String selectedDestination = destinationSpinner.getSelectedItem().toString();
-                        updateApplicationVariables(selectedDestination, null,application.GUIDE_MODE);
+                // If user selected guide
+                } else if (guideRadioButton.isChecked()) {
+                    String selectedDestination = destinationSpinner.getSelectedItem().toString();
+                    updateApplicationVariables(selectedDestination, null,application.GUIDE_MODE);
 
-                        // Start the next activity
-                        intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                        startActivity(intent);
+                    // Start the next activity
+                    intent = new Intent(getApplicationContext(), LoadingActivity.class);
+                    startActivity(intent);
 
-                    // If user selected ride
-                    } else if (rideRadioButton.isChecked()) {
-                        updateApplicationVariables(null, null,application.RIDE_MODE);
+                // If user selected ride
+                } else if (rideRadioButton.isChecked()) {
+                    updateApplicationVariables(null, null,application.RIDE_MODE);
 
-                        // Start the next activity
-                        intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                        startActivity(intent);
+                    // Start the next activity
+                    intent = new Intent(getApplicationContext(), LoadingActivity.class);
+                    startActivity(intent);
 
-                    // If the user did not select a tour while on tour
-                    } else if ((toursSpinner.getSelectedItem() == null || toursSpinner.getSelectedItem().equals(application.DEFAULT_TOUR))&& tourRadioButton.isChecked()) {
-                        Toasty.warning(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT,true).show();
-                        //Toast.makeText(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT).show();
+                // If the user did not select a tour while on tour
+                } else if ((toursSpinner.getSelectedItem() == null || toursSpinner.getSelectedItem().equals(application.DEFAULT_TOUR))&& tourRadioButton.isChecked()) {
+                    Toasty.warning(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT,true).show();
+                    //Toast.makeText(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT).show();
 
-                    // If user selected tour
-                    } else if(tourRadioButton.isChecked()) {
-                        String selectedTour = toursSpinner.getSelectedItem().toString();
-                        updateApplicationVariables(null, selectedTour, application.TOUR_MODE);
+                // If user selected tour
+                } else if(tourRadioButton.isChecked()) {
+                    String selectedTour = toursSpinner.getSelectedItem().toString();
+                    updateApplicationVariables(null, selectedTour, application.TOUR_MODE);
 
-                        // Start the next activity
-                        intent = new Intent(getApplicationContext(), LoadingActivity.class);
-                        startActivity(intent);
-                    }
+                    // Start the next activity
+                    intent = new Intent(getApplicationContext(), LoadingActivity.class);
+                    startActivity(intent);
                 }
             }
         });
+
+//        callLoomoButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (v.getId() == R.id.main_callButton) {
+//                    // If user did not select a destination while on guide
+//                    if ((destinationSpinner.getSelectedItem() == null || destinationSpinner.getSelectedItem().equals(application.DEFAULT_DESTINATION))&& guideRadioButton.isChecked()) {
+//                        Toasty.warning(getApplicationContext(),R.string.error_no_destination_selected,Toast.LENGTH_SHORT,true).show();
+//                        //Toast.makeText(getApplicationContext(), R.string.error_no_destination_selected, Toast.LENGTH_SHORT).show();
+//
+//                    // If user selected guide
+//                    } else if (guideRadioButton.isChecked()) {
+//                        String selectedDestination = destinationSpinner.getSelectedItem().toString();
+//                        updateApplicationVariables(selectedDestination, null,application.GUIDE_MODE);
+//
+//                        // Start the next activity
+//                        intent = new Intent(getApplicationContext(), LoadingActivity.class);
+//                        startActivity(intent);
+//
+//                    // If user selected ride
+//                    } else if (rideRadioButton.isChecked()) {
+//                        updateApplicationVariables(null, null,application.RIDE_MODE);
+//
+//                        // Start the next activity
+//                        intent = new Intent(getApplicationContext(), LoadingActivity.class);
+//                        startActivity(intent);
+//
+//                    // If the user did not select a tour while on tour
+//                    } else if ((toursSpinner.getSelectedItem() == null || toursSpinner.getSelectedItem().equals(application.DEFAULT_TOUR))&& tourRadioButton.isChecked()) {
+//                        Toasty.warning(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT,true).show();
+//                        //Toast.makeText(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT).show();
+//
+//                    // If user selected tour
+//                    } else if(tourRadioButton.isChecked()) {
+//                        String selectedTour = toursSpinner.getSelectedItem().toString();
+//                        updateApplicationVariables(null, selectedTour, application.TOUR_MODE);
+//
+//                        // Start the next activity
+//                        intent = new Intent(getApplicationContext(), LoadingActivity.class);
+//                        startActivity(intent);
+//                    }
+//                }
+//            }
+//        });
     }
 
     @Override
