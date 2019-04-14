@@ -29,6 +29,8 @@ import org.json.JSONObject;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import es.dmoral.toasty.Toasty;
+
 public class LoadingActivity extends Activity {
     private ProgressBar progressBar;
     private TextView statusTextView;
@@ -50,7 +52,8 @@ public class LoadingActivity extends Activity {
         public void onServiceInteraction(int callBackCode, Object obj) {
             switch(callBackCode){
                 case 1001:
-                    Toast.makeText(getApplicationContext(),(String)obj,Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(),(String)obj,Toast.LENGTH_LONG).show();
+                    Toasty.error(getApplicationContext(),(String)obj,Toast.LENGTH_LONG,true).show();
                     finish();
                     break;
                 case 1002:
@@ -63,7 +66,8 @@ public class LoadingActivity extends Activity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                                        //Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                                        Toasty.error(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT,true).show();
                                         finish();
                                     }
                                 });
@@ -160,14 +164,15 @@ public class LoadingActivity extends Activity {
 
         // Bluetooth permissions and initializations
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, application.BLE_UNSUPPORTED, Toast.LENGTH_SHORT).show();
+            Toasty.error(getApplicationContext(), application.BLE_UNSUPPORTED, Toast.LENGTH_LONG,true).show();
             finish();
         }
 
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
         if (bluetoothAdapter == null) {
-            Toast.makeText(this, application.BLUETOOTH_UNSUPPORTED, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, application.BLUETOOTH_UNSUPPORTED, Toast.LENGTH_SHORT).show();
+            Toasty.error(getApplicationContext(), application.BLE_UNSUPPORTED, Toast.LENGTH_LONG,true).show();
             finish();
         }
 
@@ -197,7 +202,8 @@ public class LoadingActivity extends Activity {
                     return;
                 } else {
                     // Alert the user that this application requires the location permission to perform the scan.
-                    Toast.makeText(this, application.LOCATION_REQUIRED, Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(this, application.LOCATION_REQUIRED, Toast.LENGTH_SHORT).show();
+                    Toasty.error(getApplicationContext(), application.LOCATION_REQUIRED, Toast.LENGTH_LONG,true).show();
                     finish();
                     return;
                 }
@@ -278,7 +284,8 @@ public class LoadingActivity extends Activity {
                             statusTextView.setText(application.LOOMO_AVAILABLE);
 
                         } else if (loomoStatus.equals("unavailable")) {
-                            Toast.makeText(getApplicationContext(), application.LOOMO_UNAVAILABLE, Toast.LENGTH_SHORT).show();
+                            Toasty.error(getApplicationContext(),application.LOOMO_UNAVAILABLE,Toast.LENGTH_LONG,true).show();
+                            //Toast.makeText(getApplicationContext(), application.LOOMO_UNAVAILABLE, Toast.LENGTH_SHORT).show();
                             finish();
                         }
 
@@ -303,7 +310,8 @@ public class LoadingActivity extends Activity {
                         dismissLoomo(true);
 
                     } else if (topic.equals(application.S2M_ERROR)) {
-                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                        Toasty.error(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT,true).show();
                         finish();
                     }
                 }

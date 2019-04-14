@@ -18,6 +18,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import es.dmoral.toasty.Toasty;
+
 public class SuccessActivity extends Activity {
     private TextView successTextView;
     private Button okButton;
@@ -149,7 +151,8 @@ public class SuccessActivity extends Activity {
                         finish();
 
                     } else if (topic.equals(application.S2M_ERROR)) {
-                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                        Toasty.error(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_LONG,true).show();
                         finish();
                     } else if (topic.equals(application.S2M_LOOMO_DISMISS)) {
                         dismissLoomo(true);

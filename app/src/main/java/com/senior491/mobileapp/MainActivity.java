@@ -32,6 +32,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import es.dmoral.toasty.Toasty;
+
 public class MainActivity extends Activity {
 
     private Button callLoomoButton;
@@ -98,7 +100,8 @@ public class MainActivity extends Activity {
                 if (v.getId() == R.id.main_callButton) {
                     // If user did not select a destination while on guide
                     if ((destinationSpinner.getSelectedItem() == null || destinationSpinner.getSelectedItem().equals(application.DEFAULT_DESTINATION))&& guideRadioButton.isChecked()) {
-                        Toast.makeText(getApplicationContext(), R.string.error_no_destination_selected, Toast.LENGTH_SHORT).show();
+                        Toasty.warning(getApplicationContext(),R.string.error_no_destination_selected,Toast.LENGTH_SHORT,true).show();
+                        //Toast.makeText(getApplicationContext(), R.string.error_no_destination_selected, Toast.LENGTH_SHORT).show();
 
                     // If user selected guide
                     } else if (guideRadioButton.isChecked()) {
@@ -119,7 +122,8 @@ public class MainActivity extends Activity {
 
                     // If the user did not select a tour while on tour
                     } else if ((toursSpinner.getSelectedItem() == null || toursSpinner.getSelectedItem().equals(application.DEFAULT_TOUR))&& tourRadioButton.isChecked()) {
-                        Toast.makeText(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT).show();
+                        Toasty.warning(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT,true).show();
+                        //Toast.makeText(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT).show();
 
                     // If user selected tour
                     } else if(tourRadioButton.isChecked()) {
