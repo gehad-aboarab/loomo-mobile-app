@@ -21,6 +21,8 @@ import android.widget.Toast;
 
 import com.ebanx.swipebtn.OnActiveListener;
 import com.ebanx.swipebtn.SwipeButton;
+import com.romainpiel.shimmer.Shimmer;
+import com.romainpiel.shimmer.ShimmerTextView;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -36,9 +38,11 @@ import es.dmoral.toasty.Toasty;
 
 public class LoadingActivity extends Activity {
     private ProgressBar progressBar;
-    private TextView statusTextView;
+//    private TextView statusTextView;
+    private ShimmerTextView statusTextView;
 //    private Button dismissButton;
     private SwipeButton dismissButton;
+    private Shimmer shimmer;
 
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
@@ -90,10 +94,13 @@ public class LoadingActivity extends Activity {
         application = (App) getApplication();
 
         // GUI initializations
-        progressBar = (ProgressBar) findViewById(R.id.loading_progress);
-        statusTextView = (TextView) findViewById(R.id.loading_status);
+//        progressBar = (ProgressBar) findViewById(R.id.loading_progress);
+//        statusTextView = (TextView) findViewById(R.id.loading_status);
+        statusTextView = (ShimmerTextView) findViewById(R.id.loading_status);
 //        dismissButton = (Button) findViewById(R.id.loading_dismissLoomo);
         dismissButton = (SwipeButton) findViewById(R.id.loading_dismissLoomo);
+        shimmer = new Shimmer();
+        shimmer.start(statusTextView);
 
 
 //        dismissButton.setOnClickListener(new View.OnClickListener() {
@@ -254,7 +261,7 @@ public class LoadingActivity extends Activity {
         if (application.currentState == application.UNBOUND) {
             // Update the GUI
             statusTextView.setText(application.RETRIEVE_LOCATION);
-            progressBar.setVisibility(View.VISIBLE);
+//            progressBar.setVisibility(View.VISIBLE);
 
             // Start scanning for beacons
             scanningBLE = new ScanningBLE(bluetoothAdapter.getBluetoothLeScanner(), application, mListener);
@@ -262,7 +269,7 @@ public class LoadingActivity extends Activity {
         } else if (application.currentState == application.BOUND_ONGOING_JOURNEY) {
             // Update the GUI
             statusTextView.setText(application.ONGOING_JOURNEY);
-            progressBar.setVisibility(View.VISIBLE);
+//            progressBar.setVisibility(View.VISIBLE);
         }
     }
 
