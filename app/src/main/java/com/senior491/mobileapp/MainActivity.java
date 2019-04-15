@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -83,12 +84,21 @@ public class MainActivity extends Activity {
             public void onRevealed(ScratchImageView iv) { }
             @Override
             public void onRevealPercentChangedListener(ScratchImageView siv, float percent) {
-                if(percent>0.4f){
+                if(percent>0.35f){
                     Toasty.success(getApplicationContext(),"You found loomo!!!",Toasty.LENGTH_SHORT,true).show();
                     siv.clear();
                 }
             }
         });
+
+        destinationNames = new ArrayList<>();
+        destinationNames.add(application.DEFAULT_DESTINATION);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, destinationNames);
+        destinationSpinner.setAdapter(spinnerArrayAdapter);destinationNames = new ArrayList<>();
+        tourNames = new ArrayList<>();
+        tourNames.add(application.DEFAULT_TOUR);
+        ArrayAdapter<String> spinnerTourArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, tourNames);
+        toursSpinner.setAdapter(spinnerTourArrayAdapter);
 
         // View the appropriate spinner (or no spinner) based on the selected mode
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -140,7 +150,6 @@ public class MainActivity extends Activity {
                 // If user selected guide
                 } else if (guideRadioButton.isChecked()) {
                     String selectedDestination = destinationSpinner.getItems().get(destinationSpinner.getSelectedIndex()).toString();
-                    Toasty.success(getApplicationContext(),selectedDestination,Toasty.LENGTH_SHORT,true).show();
                     updateApplicationVariables(selectedDestination, null,application.GUIDE_MODE);
 
                     // Start the next activity
@@ -156,15 +165,14 @@ public class MainActivity extends Activity {
                     startActivity(intent);
 
                 // If the user did not select a tour while on tour
-                } else if ((destinationSpinner.getItems().get(destinationSpinner.getSelectedIndex()) == null || destinationSpinner.getItems().get(destinationSpinner.getSelectedIndex()).equals(application.DEFAULT_DESTINATION))&& tourRadioButton.isChecked()) {
+                } else if ((toursSpinner.getItems().get(toursSpinner.getSelectedIndex()) == null || toursSpinner.getItems().get(toursSpinner.getSelectedIndex()).equals(application.DEFAULT_TOUR))&& tourRadioButton.isChecked()) {
                     Toasty.warning(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT,true).show();
                     //Toast.makeText(getApplicationContext(), R.string.error_no_tour_selected, Toast.LENGTH_SHORT).show();
 
                 // If user selected tour
                 } else if(tourRadioButton.isChecked()) {
-                    String selectedTour = destinationSpinner.getItems().get(destinationSpinner.getSelectedIndex()).toString();
+                    String selectedTour = toursSpinner.getItems().get(toursSpinner.getSelectedIndex()).toString();
                     updateApplicationVariables(null, selectedTour, application.TOUR_MODE);
-
                     // Start the next activity
                     intent = new Intent(getApplicationContext(), LoadingActivity.class);
                     startActivity(intent);

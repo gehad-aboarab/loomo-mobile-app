@@ -61,7 +61,7 @@
             android:fontFamily="sans-serif-condensed"
             android:gravity="center"
             android:button="@android:color/transparent"
-            android:text = "Guided by Loomo"
+            android:text = "Guide"
             />
         <RadioButton
             android:id="@+id/main_rideRadioButton"
@@ -73,7 +73,7 @@
             android:checked="false"
             android:gravity="center"
             android:button="@android:color/transparent"
-            android:text = "Ride Loomo"
+            android:text = "Ride"
             />
         <!--<RadioButton-->
         <!--android:id="@+id/main_tourRadioButton"-->
@@ -141,9 +141,9 @@
         <!--app:layout_constraintTop_toBottomOf="@+id/main_toursLabel" />-->
     <com.jaredrummler.materialspinner.MaterialSpinner
         android:id="@+id/main_toursSpinner"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="22dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="22dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:ms_arrow_tint="#2b71e2"
@@ -220,6 +220,7 @@
         android:layout_height="301dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginBottom="10dp"
         android:layout_weight="1"
         android:background="#a8a8a8"
         android:src="@drawable/loomo_3"
