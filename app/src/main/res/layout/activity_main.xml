@@ -16,8 +16,8 @@
         android:layout_marginEnd="8dp"
         android:fontFamily="sans-serif-condensed"
         android:text="How would you like to go?"
-        android:textColor="#fff"
-        android:textSize="14sp"
+        android:textColor="#000"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -39,35 +39,72 @@
             android:id="@+id/main_tourRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableTop="@drawable/start_journey"
             android:layout_marginRight="10dp"
             android:layout_weight="1"
             android:checked="true"
+            android:gravity="center"
             android:fontFamily="sans-serif-condensed"
-            android:text="Take a tour"
-            android:textColor="#fff"
-            android:textSize="14sp" />
-
+            android:button="@android:color/transparent"
+            android:text = "Take a tour"
+            />
         <RadioButton
             android:id="@+id/main_guideRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableTop="@drawable/start_journey"
             android:layout_marginRight="10dp"
             android:layout_weight="1"
+            android:checked="false"
             android:fontFamily="sans-serif-condensed"
-            android:text="Guided by Loomo"
-            android:textColor="#fff"
-            android:textSize="14sp" />
-
+            android:gravity="center"
+            android:button="@android:color/transparent"
+            android:text = "Guided by Loomo"
+            />
         <RadioButton
             android:id="@+id/main_rideRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableTop="@drawable/start_journey"
+            android:layout_marginRight="10dp"
             android:layout_weight="1"
             android:checked="false"
-            android:fontFamily="sans-serif-condensed"
-            android:text="Ride Loomo"
-            android:textColor="#fff"
-            android:textSize="14sp" />
+            android:gravity="center"
+            android:button="@android:color/transparent"
+            android:text = "Ride Loomo"
+            />
+        <!--<RadioButton-->
+        <!--android:id="@+id/main_tourRadioButton"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginRight="10dp"-->
+        <!--android:layout_weight="1"-->
+        <!--android:checked="true"-->
+        <!--android:fontFamily="sans-serif-condensed"-->
+        <!--android:text="Take a tour"-->
+        <!--android:textColor="#fff"-->
+        <!--android:textSize="14sp" />-->
+        <!--<RadioButton-->
+            <!--android:id="@+id/main_guideRadioButton"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginRight="10dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:fontFamily="sans-serif-condensed"-->
+            <!--android:text="Guided by Loomo"-->
+            <!--android:textColor="#fff"-->
+            <!--android:textSize="14sp" />-->
+
+        <!--<RadioButton-->
+            <!--android:id="@+id/main_rideRadioButton"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:checked="false"-->
+            <!--android:fontFamily="sans-serif-condensed"-->
+            <!--android:text="Ride Loomo"-->
+            <!--android:textColor="#fff"-->
+            <!--android:textSize="14sp" />-->
     </RadioGroup>
 
     <TextView
@@ -78,9 +115,9 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="8dp"
         android:fontFamily="sans-serif-condensed"
-        android:text="Please select a tour"
-        android:textColor="#fff"
-        android:textSize="14sp"
+        android:text="Where to?"
+        android:textColor="#000"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
@@ -124,10 +161,10 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="8dp"
         android:fontFamily="sans-serif-condensed"
-        android:text="Where would you like to go?"
-        android:textColor="#fff"
+        android:text="Where to?"
+        android:textColor="#000"
         android:visibility="gone"
-        android:textSize="14sp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"

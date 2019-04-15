@@ -16,7 +16,7 @@
         android:layout_marginEnd="8dp"
         android:fontFamily="sans-serif-condensed"
         android:text="Let's go, hop on!"
-        android:textColor="#fff"
+        android:textColor="#000"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
