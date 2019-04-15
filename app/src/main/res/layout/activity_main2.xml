@@ -5,28 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Main2Activity">
-    <com.ebanx.swipebtn.SwipeButton
-        android:id="@+id/main_callButton"
+    <com.jaredrummler.materialspinner.MaterialSpinner
+        android:id="@+id/spinner"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        app:inner_text="Call Loomo"
-        app:inner_text_color="@android:color/white"
-        app:inner_text_size="20sp"
-        app:inner_text_top_padding="18dp"
-        app:inner_text_bottom_padding="18dp"
-        app:inner_text_background="@drawable/shape_rounded"
-        app:button_image_height="60dp"
-        app:button_image_width="100dp"
-        app:button_image_disabled="@drawable/app_icon"
-        app:button_image_enabled="@drawable/app_icon"
-        app:button_left_padding="20dp"
-        app:button_right_padding="20dp"
-        app:button_top_padding="20dp"
-        app:button_bottom_padding="20dp"
-        app:button_background="@drawable/shape_button"
-        app:initial_state="disabled"
-        app:has_activate_state="false"
-        />
+        android:layout_height="wrap_content"/>
 </LinearLayout>

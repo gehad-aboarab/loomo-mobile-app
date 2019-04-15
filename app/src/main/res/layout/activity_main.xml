@@ -86,20 +86,35 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/main_radioGroup" />
 
-    <Spinner
+    <!--<Spinner-->
+        <!--android:id="@+id/main_toursSpinner"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--android:layout_marginTop="8dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:fontFamily="serif"-->
+        <!--android:gravity="center"-->
+        <!--android:popupBackground="@color/spinner_item_background"-->
+        <!--android:textColor="@android:color/white"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/main_toursLabel" />-->
+    <com.jaredrummler.materialspinner.MaterialSpinner
         android:id="@+id/main_toursSpinner"
-        android:layout_width="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:fontFamily="serif"
-        android:gravity="center"
-        android:popupBackground="@color/spinner_item_background"
-        android:textColor="@android:color/white"
+        app:ms_arrow_tint="#2b71e2"
+        app:ms_background_color="@color/spinner_color_background"
+        app:ms_background_selector="@color/spinner_color_background"
+        app:ms_text_color="#000000"
+        app:ms_dropdown_max_height="168dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/main_toursLabel" />
+        app:layout_constraintTop_toBottomOf="@+id/main_toursLabel"/>
 
     <TextView
         android:id="@+id/main_destinationLabel"
@@ -118,22 +133,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/main_radioGroup" />
 
-    <Spinner
+    <!--<Spinner-->
+        <!--android:id="@+id/main_destinationSpinner"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginStart="8dp"-->
+        <!--android:layout_marginTop="8dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:fontFamily="serif"-->
+        <!--android:gravity="center"-->
+        <!--android:popupBackground="@color/spinner_item_background"-->
+        <!--android:textColor="@android:color/white"-->
+        <!--android:visibility="gone"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/main_destinationLabel" />-->
+    <com.jaredrummler.materialspinner.MaterialSpinner
         android:id="@+id/main_destinationSpinner"
-        android:layout_width="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="22dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:fontFamily="serif"
-        android:gravity="center"
-        android:popupBackground="@color/spinner_item_background"
-        android:textColor="@android:color/white"
         android:visibility="gone"
+        app:ms_dropdown_max_height="168dp"
+        app:ms_arrow_tint="#2b71e2"
+        app:ms_background_color="@color/spinner_color_background"
+        app:ms_background_selector="@color/spinner_color_background"
+        app:ms_text_color="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/main_destinationLabel" />
-
+        app:layout_constraintTop_toBottomOf="@+id/main_destinationLabel"/>
     <!--<ImageView-->
         <!--android:id="@+id/main_loomoImage"-->
         <!--android:layout_width="409dp"-->

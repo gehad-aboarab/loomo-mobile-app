@@ -4,4 +4,5 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="spinner_item_background">#BDBDBD</color>
+    <color name="spinner_color_background">#adb0b5</color>
 </resources>
