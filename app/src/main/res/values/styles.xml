@@ -5,6 +5,6 @@
         <!-- Customize your theme here. -->
     </style>
     <style name="MyRadioButtonStyle" parent="@android:style/Widget.CompoundButton.RadioButton">
-        <item name="android:drawableTop">@drawable/custom_btn_radio</item>
+        <item name="android:drawableTop">@drawable/tour_radio_btn</item>
     </style>
 </resources>

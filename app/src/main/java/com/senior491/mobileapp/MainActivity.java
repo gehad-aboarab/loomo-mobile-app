@@ -101,6 +101,9 @@ public class MainActivity extends Activity {
                     toursLabel.setVisibility(View.GONE);
                     toursSpinner.setVisibility(View.GONE);
 
+                    rideRadioButton.setTextColor(getResources().getColor(R.color.ride_checked));
+                    guideRadioButton.setTextColor(getResources().getColor(R.color.radio_unchecked));
+                    tourRadioButton.setTextColor(getResources().getColor(R.color.radio_unchecked));
                 } else if (checkedId == R.id.main_guideRadioButton) {
                     destinationsLabel.setVisibility(View.VISIBLE);
                     destinationSpinner.setVisibility(View.VISIBLE);
@@ -108,12 +111,20 @@ public class MainActivity extends Activity {
                     toursLabel.setVisibility(View.GONE);
                     toursSpinner.setVisibility(View.GONE);
 
+                    rideRadioButton.setTextColor(getResources().getColor(R.color.radio_unchecked));
+                    guideRadioButton.setTextColor(getResources().getColor(R.color.guide_checked));
+                    tourRadioButton.setTextColor(getResources().getColor(R.color.radio_unchecked));
+
                 } else if (checkedId == R.id.main_tourRadioButton) {
                     destinationsLabel.setVisibility(View.GONE);
                     destinationSpinner.setVisibility(View.GONE);
 
                     toursLabel.setVisibility(View.VISIBLE);
                     toursSpinner.setVisibility(View.VISIBLE);
+
+                    rideRadioButton.setTextColor(getResources().getColor(R.color.radio_unchecked));
+                    guideRadioButton.setTextColor(getResources().getColor(R.color.radio_unchecked));
+                    tourRadioButton.setTextColor(getResources().getColor(R.color.tour_checked));
                 }
             }
         });
