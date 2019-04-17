@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -23,6 +24,7 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,7 +41,8 @@ public class LoadingActivity extends Activity {
     private App application;
     private Timer timer;
     private boolean loomoStatusReceived;
-    private ScanningBLE scanningBLE;
+    private EstimoteScan estimoteScan;
+//    private ScanningBLE scanningBLE;
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
@@ -48,9 +51,9 @@ public class LoadingActivity extends Activity {
     private ScanningBLE.ServiceInteractionListener mListener = new ScanningBLE.ServiceInteractionListener() {
         @Override
         public void onServiceInteraction(int callBackCode, Object obj) {
-            switch(callBackCode){
+            switch (callBackCode) {
                 case 1001:
-                    Toast.makeText(getApplicationContext(),(String)obj,Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), (String) obj, Toast.LENGTH_LONG).show();
                     finish();
                     break;
                 case 1002:
@@ -59,7 +62,7 @@ public class LoadingActivity extends Activity {
                     timer.schedule(new TimerTask() {
                         @Override
                         public void run() {
-                            if(!loomoStatusReceived){
+                            if (!loomoStatusReceived) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -95,9 +98,9 @@ public class LoadingActivity extends Activity {
     }
 
     public void dismissLoomo(boolean serverCommand) {
-        if(!serverCommand) {
+        if (!serverCommand) {
             // If the user is bound, send dismiss command
-            if(application.currentState != application.UNBOUND){
+            if (application.currentState != application.UNBOUND) {
                 MqttMessage msg = new MqttMessage();
                 JSONObject obj = new JSONObject();
                 try {
@@ -114,11 +117,13 @@ public class LoadingActivity extends Activity {
                     e.printStackTrace();
                 }
 
-             // If still scanning, stop scanning
-            } else if(scanningBLE.isScanning()) {
-                scanningBLE.stopScan();
 
-            // If user not bound and not scanning, send dismiss command
+//            } else if(scanningBLE.isScanning()) {
+//                scanningBLE.stopScan();
+                // If still scanning, stop scanning
+            } else if (estimoteScan.isObserving()) {
+
+                // If user not bound and not scanning, send dismiss command
             } else {
                 MqttMessage msg = new MqttMessage();
                 JSONObject obj = new JSONObject();
@@ -221,17 +226,6 @@ public class LoadingActivity extends Activity {
         super.onPause();
     }
 
-
-//    public void updateSharedPrefs() {
-//        SharedPreferences.Editor editor = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
-//        editor.putString("loomoId", application.loomoId);
-//        editor.putInt("state", application.currentState);
-//        editor.putString("destination", application.currentDestination);
-//        editor.putString("tour", application.currentTour);
-//        editor.putInt("mode", mode);
-//        editor.commit();
-//    }
-
     public void updateCurrentGUI() {
         if (application.currentState == application.UNBOUND) {
             // Update the GUI
@@ -239,7 +233,76 @@ public class LoadingActivity extends Activity {
             progressBar.setVisibility(View.VISIBLE);
 
             // Start scanning for beacons
-            scanningBLE = new ScanningBLE(bluetoothAdapter.getBluetoothLeScanner(), application, mListener);
+//            scanningBLE = new ScanningBLE(bluetoothAdapter.getBluetoothLeScanner(), application, mListener);
+
+            new AsyncTask<Void, Void, Void>() {
+                EstimoteScan estimoteScan = new EstimoteScan(application);
+                String nearestBeacon;
+                long start = 0;
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    super.onPostExecute(aVoid);
+                    nearestBeacon = estimoteScan.getNearestBeaconTag();
+                    Log.d("Senior", "Your location is " + nearestBeacon);
+
+                    if (nearestBeacon != null) {
+                        //Connection to server
+                        MqttMessage msg = new MqttMessage();
+                        JSONObject obj = new JSONObject();
+                        try {
+                            obj.put("clientID", application.clientId);
+                            obj.put("beaconTag", nearestBeacon);
+                            obj.put("mapName", application.mapName);
+                            obj.put("destination", application.currentDestination);
+                            obj.put("tour", application.currentTour);
+                            obj.put("mode", estimoteScan.getMode());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        msg.setPayload(obj.toString().getBytes());
+                        Log.d(TAG, msg.toString());
+                        try {
+                            application.mqttHelper.mqttAndroidClient.publish(application.M2S_BEACON_SIGNALS, msg);
+                            mListener.onServiceInteraction(1002, "");
+                            loomoStatusReceived = false;
+                            timer = new Timer();
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    if (!loomoStatusReceived) {
+                                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                                        finish();
+                                    }
+                                }
+                            },4000);
+                        } catch (MqttException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                protected void onCancelled() {
+                    estimoteScan.stopObserving();
+                    Toast.makeText(application, application.CANNOT_LOCATE, Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                protected void onProgressUpdate(Void... values) {
+                    long currentTime = System.currentTimeMillis();
+                    if (currentTime - start > 10000) {
+                        cancel(true);
+                    }
+                }
+
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    start = System.currentTimeMillis();
+                    estimoteScan.startObserving();
+                    return null;
+                }
+            }.execute();
 
         } else if (application.currentState == application.BOUND_ONGOING_JOURNEY) {
             // Update the GUI
@@ -248,16 +311,19 @@ public class LoadingActivity extends Activity {
         }
     }
 
-    private void startMqtt(){
+    private void startMqtt() {
         application.mqttHelper.setCallback(new MqttCallbackExtended() {
             @Override
-            public void connectComplete(boolean b, String s) {}
+            public void connectComplete(boolean b, String s) {
+            }
 
             @Override
-            public void connectionLost(Throwable throwable) {}
+            public void connectionLost(Throwable throwable) {
+            }
 
             @Override
-            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {}
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+            }
 
             @Override
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
