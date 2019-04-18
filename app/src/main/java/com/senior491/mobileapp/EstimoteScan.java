@@ -14,14 +14,16 @@ import kotlin.jvm.functions.Function1;
 
 public class EstimoteScan {
     private ProximityObserver proximityObserver;
-    private TextView textView;
-    private boolean observing;
+    private ProximityObserver.Handler handler;
+
     private App application;
 
+    private boolean observing;
     private String mode;
-    private static final int REQUEST_PERMISSIONS_CALLBACK = 0;
-
     private String nearestBeaconTag;
+    private String nearestBeaconId;
+
+    private static final int REQUEST_PERMISSIONS_CALLBACK = 0;
 
     public EstimoteScan(App application){
         this.application = (App) application;
@@ -39,6 +41,11 @@ public class EstimoteScan {
     }
 
     public void startObserving() {
+        if (observing) {
+            Log.d("Senior", "WARNING: startObserving called twice, ignoring the second call!");
+            return;
+        }
+
         Log.d("Senior", "Starting to observe...");
         EstimoteCloudCredentials estimoteCloudCredentials =
                 new EstimoteCloudCredentials("loomo-app-test-cef",
@@ -58,6 +65,7 @@ public class EstimoteScan {
                         public Unit invoke(ProximityZoneContext proximityZoneContext) {
                             Log.d("Senior", "Entered zone: " + proximityZoneContext.getTag());
                             nearestBeaconTag = proximityZoneContext.getTag();
+                            nearestBeaconId = proximityZoneContext.getDeviceId();
                             return null;
                         }
                     })
@@ -65,22 +73,26 @@ public class EstimoteScan {
                         @Override
                         public Unit invoke(ProximityZoneContext proximityZoneContext) {
                             nearestBeaconTag = null;
+                            nearestBeaconId = proximityZoneContext.getDeviceId();
                             return null;
                         }
                     }).build();
         }
 
-        proximityObserver.startObserving(zones);
+        handler = proximityObserver.startObserving(zones);
     }
 
     public void stopObserving() {
         observing = false;
-        proximityObserver.startObserving(new ProximityZone[]{});
+        handler.stop();
+
     }
 
     public String getNearestBeaconTag() {
         return nearestBeaconTag;
     }
+
+    public String getNearestBeaconId() { return nearestBeaconId; }
 
     public String getMode() {
         return mode;
