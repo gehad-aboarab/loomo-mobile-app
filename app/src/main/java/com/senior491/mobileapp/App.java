@@ -66,6 +66,7 @@ public class App extends Application {
     public String tourName = "EB2-Rotunda";
     public ArrayList<String> destinations;
     public ArrayList<String> tours;
+    public ArrayList<String> beacons;
 
     @Override
     public void onCreate() {
@@ -83,9 +84,7 @@ public class App extends Application {
         else
             currentState = UNBOUND;
 
-
         mqttHelper = new MqttHelper(this);
-
     }
 
     public void updateCurrentMode(int mode){

@@ -277,16 +277,25 @@ public class MainActivity extends Activity {
 
                     if (topic.equals(application.S2M_GET_MAP_DESTINATIONS)) {
                         try {
+                            // Adding the destinations to the array of destinations
                             JSONArray destinations = obj.getJSONArray("destinations");
                             application.destinations.clear();
 
-                            // Adding the destinations to the array of destinations
                             for (int i = 0; i < destinations.length(); i++) {
                                 String name = destinations.getJSONObject(i).getString("name");
                                 application.destinations.add(name);
                             }
                             Collections.sort(application.destinations, String.CASE_INSENSITIVE_ORDER);
                             initDestinationsSpinner();
+
+                            // Adding the beacons to the array of beacons
+                            JSONArray beacons = obj.getJSONArray("beacons");
+                            application.beacons.clear();
+
+                            for (int i = 0; i < beacons.length(); i++) {
+                                String name = beacons.getString(i);
+                                application.beacons.add(name);
+                            }
 
                         } catch(Exception e){
                             Log.d(TAG, "messageArrived Error: "+e.getMessage());

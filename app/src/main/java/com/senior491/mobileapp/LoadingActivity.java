@@ -1,7 +1,6 @@
 package com.senior491.mobileapp;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -42,7 +41,6 @@ public class LoadingActivity extends Activity {
     private App application;
     private Timer timer;
     private boolean loomoStatusReceived;
-    private EstimoteScan estimoteScan;
 //    private ScanningBLE scanningBLE;
 
     private static final int REQUEST_ENABLE_BT = 1;
@@ -121,9 +119,6 @@ public class LoadingActivity extends Activity {
 
 //            } else if(scanningBLE.isScanning()) {
 //                scanningBLE.stopScan();
-                // If still scanning, stop scanning
-            } else if (estimoteScan.isObserving()) {
-                estimoteScan.startObserving();
                 // If user not bound and not scanning, send dismiss command
             } else {
                 MqttMessage msg = new MqttMessage();
@@ -227,7 +222,6 @@ public class LoadingActivity extends Activity {
         super.onPause();
     }
 
-    @SuppressLint("StaticFieldLeak")
     public void updateCurrentGUI() {
         if (application.currentState == application.UNBOUND) {
             // Update the GUI
@@ -246,7 +240,6 @@ public class LoadingActivity extends Activity {
                 protected void onPostExecute(Void aVoid) {
                     super.onPostExecute(aVoid);
                     nearestBeacon = estimoteScan.getNearestBeaconTag();
-                    estimoteScan.stopObserving();
                     Log.d("Senior", "Your location is " + nearestBeacon);
 
                     if (nearestBeacon != null) {
@@ -255,7 +248,7 @@ public class LoadingActivity extends Activity {
                         JSONObject obj = new JSONObject();
                         try {
                             obj.put("clientID", application.clientId);
-                            obj.put("beaconId", estimoteScan.getNearestBeaconId());
+                            obj.put("beaconID", nearestBeacon);
                             obj.put("mapName", application.mapName);
                             obj.put("destination", application.currentDestination);
                             obj.put("tour", application.currentTour);
@@ -278,7 +271,7 @@ public class LoadingActivity extends Activity {
                                         finish();
                                     }
                                 }
-                            }, 4000);
+                            },4000);
                         } catch (MqttException e) {
                             e.printStackTrace();
                         }

@@ -54,12 +54,12 @@ public class EstimoteScan {
         proximityObserver = new ProximityObserverBuilder(application, estimoteCloudCredentials).build();
         observing = true;
 
-        String[] tags = {"blueberry_b", "coconut_b", "icy_b", "mint_b", "blueberry_a", "coconut_a", "icy_a", "mint_a"};
-        ProximityZone[] zones = new ProximityZone[tags.length];
+        ProximityZone[] zones = new ProximityZone[application.beacons.size()];
         for (int i = 0; i < zones.length; ++i)
         {
-            Log.d("Senior", "Added zone " + tags[i]);
-            zones[i] = new ProximityZoneBuilder().forTag(tags[i]).inCustomRange(2)
+            String beacon = application.beacons.get(i);
+            Log.d("Senior", "Added zone " + beacon);
+            zones[i] = new ProximityZoneBuilder().forTag(beacon).inCustomRange(2)
                     .onEnter(new Function1<ProximityZoneContext, Unit>() {
                         @Override
                         public Unit invoke(ProximityZoneContext proximityZoneContext) {
