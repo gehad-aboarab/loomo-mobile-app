@@ -47,35 +47,35 @@ public class LoadingActivity extends Activity {
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
     private static final String TAG = "SeniorSucks_Loading";
 
-    private ScanningBLE.ServiceInteractionListener mListener = new ScanningBLE.ServiceInteractionListener() {
-        @Override
-        public void onServiceInteraction(int callBackCode, Object obj) {
-            switch (callBackCode) {
-                case 1001:
-                    Toast.makeText(getApplicationContext(), (String) obj, Toast.LENGTH_LONG).show();
-                    finish();
-                    break;
-                case 1002:
-                    loomoStatusReceived = false;
-                    timer = new Timer();
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            if (!loomoStatusReceived) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
-                                        finish();
-                                    }
-                                });
-                            }
-                        }
-                    }, 4000);
-                    break;
-            }
-        }
-    };
+//    private ScanningBLE.ServiceInteractionListener mListener = new ScanningBLE.ServiceInteractionListener() {
+//        @Override
+//        public void onServiceInteraction(int callBackCode, Object obj) {
+//            switch (callBackCode) {
+//                case 1001:
+//                    Toast.makeText(getApplicationContext(), (String) obj, Toast.LENGTH_LONG).show();
+//                    finish();
+//                    break;
+//                case 1002:
+//                    loomoStatusReceived = false;
+//                    timer = new Timer();
+//                    timer.schedule(new TimerTask() {
+//                        @Override
+//                        public void run() {
+//                            if (!loomoStatusReceived) {
+//                                runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+//                                        finish();
+//                                    }
+//                                });
+//                            }
+//                        }
+//                    }, 4000);
+//                    break;
+//            }
+//        }
+//    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -234,67 +234,72 @@ public class LoadingActivity extends Activity {
             new AsyncTask<Void, Void, Void>() {
                 EstimoteScan estimoteScan = new EstimoteScan(application);
                 String nearestBeacon;
-                long start = 0;
+                Timer stablizeTimer;
 
                 @Override
                 protected void onPostExecute(Void aVoid) {
                     super.onPostExecute(aVoid);
-                    nearestBeacon = estimoteScan.getNearestBeaconTag();
-                    Log.d("Senior", "Your location is " + nearestBeacon);
+                    stablizeTimer = new Timer();
+                    stablizeTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            // Wait for 6 seconds to get beacon
+                            if(estimoteScan.isStable()){
+                                nearestBeacon = estimoteScan.getNearestBeaconId();
+                                Log.d(TAG, "Your location is " + nearestBeacon);
 
-                    if (nearestBeacon != null) {
-                        //Connection to server
-                        MqttMessage msg = new MqttMessage();
-                        JSONObject obj = new JSONObject();
-                        try {
-                            obj.put("clientID", application.clientId);
-                            obj.put("beaconID", nearestBeacon);
-                            obj.put("mapName", application.mapName);
-                            obj.put("destination", application.currentDestination);
-                            obj.put("tour", application.currentTour);
-                            obj.put("mode", estimoteScan.getMode());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        msg.setPayload(obj.toString().getBytes());
-                        Log.d(TAG, msg.toString());
-                        try {
-                            application.mqttHelper.mqttAndroidClient.publish(application.M2S_BEACON_SIGNALS, msg);
-                            mListener.onServiceInteraction(1002, "");
-                            loomoStatusReceived = false;
-                            timer = new Timer();
-                            timer.schedule(new TimerTask() {
-                                @Override
-                                public void run() {
-                                    if (!loomoStatusReceived) {
-                                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
-                                        finish();
+                                if (nearestBeacon != null) {
+                                    //Connection to server
+                                    MqttMessage msg = new MqttMessage();
+                                    JSONObject obj = new JSONObject();
+                                    try {
+                                        obj.put("clientID", application.clientId);
+                                        obj.put("beaconID", nearestBeacon);
+                                        obj.put("mapName", application.mapName);
+                                        obj.put("destination", application.currentDestination);
+                                        obj.put("tour", application.currentTour);
+                                        obj.put("mode", estimoteScan.getMode());
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    msg.setPayload(obj.toString().getBytes());
+                                    Log.d(TAG, msg.toString());
+                                    try {
+                                        application.mqttHelper.mqttAndroidClient.publish(application.M2S_BEACON_SIGNALS, msg);
+//                                        mListener.onServiceInteraction(1002, "");
+                                        loomoStatusReceived = false;
+                                        timer = new Timer();
+
+                                        // Wait for the server to reply within 4 seconds
+                                        timer.schedule(new TimerTask() {
+                                            @Override
+                                            public void run() {
+                                                if (!loomoStatusReceived) {
+                                                    runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                                                            finish();
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        },4000);
+                                    } catch (MqttException e) {
+                                        e.printStackTrace();
                                     }
                                 }
-                            },4000);
-                        } catch (MqttException e) {
-                            e.printStackTrace();
+                            } else {
+                                estimoteScan.stopObserving();
+                                Toast.makeText(application, application.CANNOT_LOCATE, Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                }
+                    }, 6000);
 
-                @Override
-                protected void onCancelled() {
-                    estimoteScan.stopObserving();
-                    Toast.makeText(application, application.CANNOT_LOCATE, Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                protected void onProgressUpdate(Void... values) {
-                    long currentTime = System.currentTimeMillis();
-                    if (currentTime - start > 10000) {
-                        cancel(true);
-                    }
                 }
 
                 @Override
                 protected Void doInBackground(Void... voids) {
-                    start = System.currentTimeMillis();
                     estimoteScan.startObserving();
                     return null;
                 }

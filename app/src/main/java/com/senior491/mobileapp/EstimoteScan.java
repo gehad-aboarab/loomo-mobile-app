@@ -2,13 +2,14 @@ package com.senior491.mobileapp;
 
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.estimote.proximity_sdk.api.EstimoteCloudCredentials;
 import com.estimote.proximity_sdk.api.ProximityObserver;
 import com.estimote.proximity_sdk.api.ProximityObserverBuilder;
 import com.estimote.proximity_sdk.api.ProximityZone;
 import com.estimote.proximity_sdk.api.ProximityZoneBuilder;
 import com.estimote.proximity_sdk.api.ProximityZoneContext;
-
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
@@ -17,13 +18,14 @@ public class EstimoteScan {
     private ProximityObserver.Handler handler;
 
     private App application;
-
     private boolean observing;
+    private boolean stable;
     private String mode;
     private String nearestBeaconTag;
     private String nearestBeaconId;
 
     private static final int REQUEST_PERMISSIONS_CALLBACK = 0;
+    private static final String TAG = "SeniorSucksEstimoteScan";
 
     public EstimoteScan(App application){
         this.application = (App) application;
@@ -34,6 +36,8 @@ public class EstimoteScan {
         } else if(application.currentMode == application.TOUR_MODE){
             this.mode = "tour";
         }
+
+        Log.d(TAG, "Scan constructor called");
     }
 
     public boolean isObserving(){
@@ -46,24 +50,27 @@ public class EstimoteScan {
             return;
         }
 
-        Log.d("Senior", "Starting to observe...");
+        Log.d(TAG, "Starting to observe...");
         EstimoteCloudCredentials estimoteCloudCredentials =
                 new EstimoteCloudCredentials("loomo-app-test-cef",
                         "dd5b75f96aae79e9b94496671f6e9dbc");
 
         proximityObserver = new ProximityObserverBuilder(application, estimoteCloudCredentials).build();
         observing = true;
+        stable = false;
 
+        Log.d(TAG, application.beacons.size() + "");
         ProximityZone[] zones = new ProximityZone[application.beacons.size()];
         for (int i = 0; i < zones.length; ++i)
         {
             String beacon = application.beacons.get(i);
-            Log.d("Senior", "Added zone " + beacon);
+            Log.d(TAG, "Added zone " + beacon);
             zones[i] = new ProximityZoneBuilder().forTag(beacon).inCustomRange(2)
                     .onEnter(new Function1<ProximityZoneContext, Unit>() {
                         @Override
                         public Unit invoke(ProximityZoneContext proximityZoneContext) {
-                            Log.d("Senior", "Entered zone: " + proximityZoneContext.getTag());
+                            stable = true;
+                            Log.d(TAG, "Entered zone: " + proximityZoneContext.getDeviceId());
                             nearestBeaconTag = proximityZoneContext.getTag();
                             nearestBeaconId = proximityZoneContext.getDeviceId();
                             return null;
@@ -74,6 +81,7 @@ public class EstimoteScan {
                         public Unit invoke(ProximityZoneContext proximityZoneContext) {
                             nearestBeaconTag = null;
                             nearestBeaconId = proximityZoneContext.getDeviceId();
+                            stable = false;
                             return null;
                         }
                     }).build();
@@ -93,6 +101,10 @@ public class EstimoteScan {
     }
 
     public String getNearestBeaconId() { return nearestBeaconId; }
+
+    public boolean isStable() {
+        return stable;
+    }
 
     public String getMode() {
         return mode;

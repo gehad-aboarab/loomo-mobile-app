@@ -76,6 +76,7 @@ public class App extends Application {
         Log.d(TAG, "My device ID: " + clientId);
         destinations = new ArrayList<>();
         tours = new ArrayList<>();
+        beacons = new ArrayList<>();
 
         SharedPreferences sp = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
         loomoId = sp.getString("loomoId",null);
