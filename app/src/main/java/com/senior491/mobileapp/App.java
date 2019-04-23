@@ -60,6 +60,7 @@ public class App extends Application {
     public int currentMode;
     public String currentDestination;
     public String currentTour;
+    public String currentBeacon = "5812ca89ff64bf356564f5ee641f6f1b";
 
     public MqttHelper mqttHelper;
     public String mapName = "EB2-Rotunda";
@@ -120,6 +121,13 @@ public class App extends Application {
         this.loomoId = loomoId;
         SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
         editor.putString("loomoId", this.loomoId);
+        editor.commit();
+    }
+
+    public void updateBeacon(String beacon){
+        this.currentBeacon = beacon;
+        SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
+        editor.putString("beacon", this.currentBeacon);
         editor.commit();
     }
 

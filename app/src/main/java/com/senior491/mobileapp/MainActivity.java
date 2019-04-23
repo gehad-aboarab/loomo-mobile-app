@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,6 +32,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends Activity {
 
@@ -44,6 +47,9 @@ public class MainActivity extends Activity {
     private App application;
     private ArrayList<String> destinationNames;
     private ArrayList<String> tourNames;
+
+    private Timer timer;
+    private boolean loomoStatusReceived;
 
     private static final int RETRIEVE_LOCATION = 0;
     private static final String TAG = "SeniorSucks_Main";
@@ -173,6 +179,87 @@ public class MainActivity extends Activity {
             intent = new Intent(getApplicationContext(), LoadingActivity.class);
             startActivity(intent);
         }
+
+//        new AsyncTask<Void, Void, Void>() {
+//            EstimoteScan estimoteScan = new EstimoteScan(application);
+//            String nearestBeacon;
+//            Timer stablizeTimer;
+//
+//            @Override
+//            protected void onPostExecute(Void aVoid) {
+//                super.onPostExecute(aVoid);
+//                stablizeTimer = new Timer();
+//                stablizeTimer.schedule(new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        // Wait for 6 seconds to get beacon
+//                        if(estimoteScan.isStable()){
+//                            nearestBeacon = estimoteScan.getNearestBeaconId();
+//                            Log.d(TAG, "Your location is " + nearestBeacon);
+//
+//                            if (nearestBeacon != null) {
+//                                //Connection to server
+//                                MqttMessage msg = new MqttMessage();
+//                                JSONObject obj = new JSONObject();
+//                                try {
+//                                    obj.put("clientID", application.clientId);
+//                                    obj.put("beaconID", nearestBeacon);
+//                                    obj.put("mapName", application.mapName);
+//                                    obj.put("destination", application.currentDestination);
+//                                    obj.put("tour", application.currentTour);
+//                                    obj.put("mode", estimoteScan.getMode());
+//                                } catch (JSONException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                msg.setPayload(obj.toString().getBytes());
+//                                Log.d(TAG, msg.toString());
+//                                try {
+//                                    application.mqttHelper.mqttAndroidClient.publish(application.M2S_BEACON_SIGNALS, msg);
+////                                        mListener.onServiceInteraction(1002, "");
+//                                    loomoStatusReceived = false;
+//                                    timer = new Timer();
+//
+//                                    // Wait for the server to reply within 4 seconds
+//                                    timer.schedule(new TimerTask() {
+//                                        @Override
+//                                        public void run() {
+//                                            if (!loomoStatusReceived) {
+//                                                runOnUiThread(new Runnable() {
+//                                                    @Override
+//                                                    public void run() {
+//                                                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+//                                                        finish();
+//                                                    }
+//                                                });
+//                                            }
+//                                        }
+//                                    },4000);
+//                                } catch (MqttException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        } else {
+//                            runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+////                                        estimoteScan.stopObserving();
+//                                    Toast.makeText(application, application.CANNOT_LOCATE, Toast.LENGTH_SHORT).show();
+//                                    finish();
+//                                }
+//                            });
+//                        }
+//                    }
+//                }, 10000);
+//
+//            }
+//
+//            @Override
+//            protected Void doInBackground(Void... voids) {
+//                estimoteScan.startObserving();
+//                return null;
+//            }
+//        }.execute();
+
     }
 
     private void updateApplicationVariables(String destination, String tour, int mode){
@@ -296,6 +383,7 @@ public class MainActivity extends Activity {
                                 String name = beacons.getString(i);
                                 application.beacons.add(name);
                             }
+                            startService(new Intent(getApplicationContext(), EstimoteScan.class));
 
                         } catch(Exception e){
                             Log.d(TAG, "messageArrived Error: "+e.getMessage());

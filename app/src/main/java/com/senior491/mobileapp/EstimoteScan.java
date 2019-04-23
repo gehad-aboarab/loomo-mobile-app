@@ -1,5 +1,9 @@
 package com.senior491.mobileapp;
 
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -7,13 +11,18 @@ import android.widget.Toast;
 import com.estimote.proximity_sdk.api.EstimoteCloudCredentials;
 import com.estimote.proximity_sdk.api.ProximityObserver;
 import com.estimote.proximity_sdk.api.ProximityObserverBuilder;
+import com.estimote.proximity_sdk.api.ProximityObserverConfiguration;
 import com.estimote.proximity_sdk.api.ProximityZone;
 import com.estimote.proximity_sdk.api.ProximityZoneBuilder;
 import com.estimote.proximity_sdk.api.ProximityZoneContext;
+
+import java.util.ArrayList;
+import java.util.Set;
+
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
-public class EstimoteScan {
+public class EstimoteScan extends Service {
     private ProximityObserver proximityObserver;
     private ProximityObserver.Handler handler;
 
@@ -27,18 +36,18 @@ public class EstimoteScan {
     private static final int REQUEST_PERMISSIONS_CALLBACK = 0;
     private static final String TAG = "SeniorSucksEstimoteScan";
 
-    public EstimoteScan(App application){
-        this.application = (App) application;
-        if(application.currentMode == application.GUIDE_MODE) {
-            this.mode = "guide";
-        } else if(application.currentMode == application.RIDE_MODE){
-            this.mode = "ride";
-        } else if(application.currentMode == application.TOUR_MODE){
-            this.mode = "tour";
-        }
-
-        Log.d(TAG, "Scan constructor called");
-    }
+//    public EstimoteScan(App application){
+//        this.application = (App) application;
+//        if(application.currentMode == application.GUIDE_MODE) {
+//            this.mode = "guide";
+//        } else if(application.currentMode == application.RIDE_MODE){
+//            this.mode = "ride";
+//        } else if(application.currentMode == application.TOUR_MODE){
+//            this.mode = "tour";
+//        }
+//
+//        Log.d(TAG, "Scan constructor called");
+//    }
 
     public boolean isObserving(){
         return observing;
@@ -57,15 +66,17 @@ public class EstimoteScan {
 
         proximityObserver = new ProximityObserverBuilder(application, estimoteCloudCredentials).build();
         observing = true;
-        stable = false;
+//        stable = false;
 
         Log.d(TAG, application.beacons.size() + "");
         ProximityZone[] zones = new ProximityZone[application.beacons.size()];
+        ProximityZoneBuilder builder = new ProximityZoneBuilder();
         for (int i = 0; i < zones.length; ++i)
         {
-            String beacon = application.beacons.get(i);
+            final String beacon = application.beacons.get(i);
             Log.d(TAG, "Added zone " + beacon);
-            zones[i] = new ProximityZoneBuilder().forTag(beacon).inCustomRange(2)
+
+            zones[i] = builder.forTag(beacon).inCustomRange(1.5)
                     .onEnter(new Function1<ProximityZoneContext, Unit>() {
                         @Override
                         public Unit invoke(ProximityZoneContext proximityZoneContext) {
@@ -73,15 +84,7 @@ public class EstimoteScan {
                             Log.d(TAG, "Entered zone: " + proximityZoneContext.getDeviceId());
                             nearestBeaconTag = proximityZoneContext.getTag();
                             nearestBeaconId = proximityZoneContext.getDeviceId();
-                            return null;
-                        }
-                    })
-                    .onExit(new Function1<ProximityZoneContext, Unit>() {
-                        @Override
-                        public Unit invoke(ProximityZoneContext proximityZoneContext) {
-                            nearestBeaconTag = null;
-                            nearestBeaconId = proximityZoneContext.getDeviceId();
-                            stable = false;
+                            application.updateBeacon(nearestBeaconTag);
                             return null;
                         }
                     }).build();
@@ -93,7 +96,6 @@ public class EstimoteScan {
     public void stopObserving() {
         observing = false;
         handler.stop();
-
     }
 
     public String getNearestBeaconTag() {
@@ -108,5 +110,18 @@ public class EstimoteScan {
 
     public String getMode() {
         return mode;
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        application = (App) getApplication();
+        startObserving();
+        return super.onStartCommand(intent, flags, startId);
     }
 }

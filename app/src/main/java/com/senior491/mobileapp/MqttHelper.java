@@ -22,14 +22,14 @@ public class MqttHelper {
     String clientId;
     final String subscriptionTopic = "server-to-mobile/#";
     final String username = "gwvgvrbb";
-    final String password = "ZaQHr9ysNDPm";
+    final String password = "FiWzp2W1_nQb";
     private final String TAG = "SeniorSucks_Mqtt";
     final App mobApp;
 
     public MqttHelper(Application app) {
         Context context = app.getApplicationContext();
         mobApp = (App) app;
-        clientId = mobApp.clientId+"oip";
+        clientId = mobApp.clientId + "oip";
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
         connect();
     }

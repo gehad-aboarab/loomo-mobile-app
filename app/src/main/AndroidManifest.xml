@@ -43,6 +43,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"/>
 
+        <service android:name=".EstimoteScan"/>
         <service android:name="org.eclipse.paho.android.service.MqttService"/>
     </application>
 
