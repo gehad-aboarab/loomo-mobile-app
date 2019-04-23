@@ -43,41 +43,10 @@ public class LoadingActivity extends Activity {
     private Timer stablizeTimer;
     private boolean loomoStatusReceived;
     private String mode;
-//    private ScanningBLE scanningBLE;
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
     private static final String TAG = "SeniorSucks_Loading";
-
-//    private ScanningBLE.ServiceInteractionListener mListener = new ScanningBLE.ServiceInteractionListener() {
-//        @Override
-//        public void onServiceInteraction(int callBackCode, Object obj) {
-//            switch (callBackCode) {
-//                case 1001:
-//                    Toast.makeText(getApplicationContext(), (String) obj, Toast.LENGTH_LONG).show();
-//                    finish();
-//                    break;
-//                case 1002:
-//                    loomoStatusReceived = false;
-//                    timer = new Timer();
-//                    timer.schedule(new TimerTask() {
-//                        @Override
-//                        public void run() {
-//                            if (!loomoStatusReceived) {
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
-//                                        finish();
-//                                    }
-//                                });
-//                            }
-//                        }
-//                    }, 4000);
-//                    break;
-//            }
-//        }
-//    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,11 +86,7 @@ public class LoadingActivity extends Activity {
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
-
-
-//            } else if(scanningBLE.isScanning()) {
-//                scanningBLE.stopScan();
-                // If user not bound and not scanning, send dismiss command
+            // If user not bound and not scanning, send dismiss command
             } else {
                 MqttMessage msg = new MqttMessage();
                 JSONObject obj = new JSONObject();
@@ -230,8 +195,7 @@ public class LoadingActivity extends Activity {
             statusTextView.setText(application.RETRIEVE_LOCATION);
             progressBar.setVisibility(View.VISIBLE);
 
-            // Start scanning for beacons
-//            scanningBLE = new ScanningBLE(bluetoothAdapter.getBluetoothLeScanner(), application, mListener);
+            // Scan for a few seconds
             stablizeTimer = new Timer();
             stablizeTimer.schedule(new TimerTask() {
                 @Override
@@ -263,7 +227,6 @@ public class LoadingActivity extends Activity {
                         Log.d(TAG, msg.toString());
                         try {
                             application.mqttHelper.mqttAndroidClient.publish(application.M2S_BEACON_SIGNALS, msg);
-//                                        mListener.onServiceInteraction(1002, "");
                             loomoStatusReceived = false;
                             timer = new Timer();
 
@@ -351,7 +314,6 @@ public class LoadingActivity extends Activity {
 
                         // Move to next activity and pass the mode as -1 to indicate end of journey
                         Intent intent = new Intent(getApplicationContext(), SuccessActivity.class);
-//                        intent.putExtra("mode", -1);
                         startActivity(intent);
 
                     } else if (topic.equals(application.S2M_LOOMO_DISMISS)) {

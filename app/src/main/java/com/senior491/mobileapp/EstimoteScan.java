@@ -28,26 +28,10 @@ public class EstimoteScan extends Service {
 
     private App application;
     private boolean observing;
-    private boolean stable;
-    private String mode;
     private String nearestBeaconTag;
     private String nearestBeaconId;
 
-    private static final int REQUEST_PERMISSIONS_CALLBACK = 0;
     private static final String TAG = "SeniorSucksEstimoteScan";
-
-//    public EstimoteScan(App application){
-//        this.application = (App) application;
-//        if(application.currentMode == application.GUIDE_MODE) {
-//            this.mode = "guide";
-//        } else if(application.currentMode == application.RIDE_MODE){
-//            this.mode = "ride";
-//        } else if(application.currentMode == application.TOUR_MODE){
-//            this.mode = "tour";
-//        }
-//
-//        Log.d(TAG, "Scan constructor called");
-//    }
 
     public boolean isObserving(){
         return observing;
@@ -55,7 +39,7 @@ public class EstimoteScan extends Service {
 
     public void startObserving() {
         if (observing) {
-            Log.d("Senior", "WARNING: startObserving called twice, ignoring the second call!");
+            Log.d(TAG, "WARNING: startObserving called twice, ignoring the second call!");
             return;
         }
 
@@ -66,7 +50,6 @@ public class EstimoteScan extends Service {
 
         proximityObserver = new ProximityObserverBuilder(application, estimoteCloudCredentials).build();
         observing = true;
-//        stable = false;
 
         Log.d(TAG, application.beacons.size() + "");
         ProximityZone[] zones = new ProximityZone[application.beacons.size()];
@@ -80,7 +63,6 @@ public class EstimoteScan extends Service {
                     .onEnter(new Function1<ProximityZoneContext, Unit>() {
                         @Override
                         public Unit invoke(ProximityZoneContext proximityZoneContext) {
-                            stable = true;
                             Log.d(TAG, "Entered zone: " + proximityZoneContext.getDeviceId());
                             nearestBeaconTag = proximityZoneContext.getTag();
                             nearestBeaconId = proximityZoneContext.getDeviceId();
@@ -103,14 +85,6 @@ public class EstimoteScan extends Service {
     }
 
     public String getNearestBeaconId() { return nearestBeaconId; }
-
-    public boolean isStable() {
-        return stable;
-    }
-
-    public String getMode() {
-        return mode;
-    }
 
     @Nullable
     @Override
