@@ -48,11 +48,7 @@ public class MainActivity extends Activity {
     private ArrayList<String> destinationNames;
     private ArrayList<String> tourNames;
 
-    private Timer timer;
-    private boolean loomoStatusReceived;
-
-    private static final int RETRIEVE_LOCATION = 0;
-    private static final String TAG = "SeniorSucks_Main";
+    private static final String TAG = "MainActivity_Tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,12 +157,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences sp = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        application.currentDestination = sp.getString("destination", null);
-        application.currentTour = sp.getString("tour", null);
-        application.currentMode = sp.getInt("mode", application.GUIDE_MODE);
-        application.currentState = sp.getInt("state", application.UNBOUND);
-        application.loomoId = sp.getString("loomoId", null);
+        initApplicationVariables();
 
         // Start respective activity based on state
         if (application.currentState == application.BOUND_WAITING) {
@@ -179,6 +170,14 @@ public class MainActivity extends Activity {
             intent = new Intent(getApplicationContext(), LoadingActivity.class);
             startActivity(intent);
         }
+    }
+
+    public void initApplicationVariables(){
+        application.loomoId = application.sp.getString("loomoId", null);
+        application.currentMode = application.sp.getInt("mode", application.GUIDE_MODE);
+        application.currentState = application.sp.getInt("state", application.UNBOUND);
+        application.currentDestination = application.sp.getString("destination", null);
+        application.currentTour = application.sp.getString("tour", null);
     }
 
     private void updateApplicationVariables(String destination, String tour, int mode){
@@ -277,47 +276,51 @@ public class MainActivity extends Activity {
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
                 JSONObject obj = new JSONObject(mqttMessage.toString());
                 String clientId = obj.get("clientID").toString();
+                try {
+                    if (clientId.equals(application.clientId)) {
+                        Log.w(TAG, mqttMessage.toString());
 
-                if (clientId.equals(application.clientId)) {
-                    Log.w(TAG, mqttMessage.toString());
+                        if (topic.equals(application.S2M_GET_MAP_DESTINATIONS)) {
+                            try {
+                                // Adding the destinations to the array of destinations
+                                JSONArray destinations = obj.getJSONArray("destinations");
+                                application.destinations.clear();
 
-                    if (topic.equals(application.S2M_GET_MAP_DESTINATIONS)) {
-                        try {
-                            // Adding the destinations to the array of destinations
-                            JSONArray destinations = obj.getJSONArray("destinations");
-                            application.destinations.clear();
+                                for (int i = 0; i < destinations.length(); i++) {
+                                    String name = destinations.getJSONObject(i).getString("name");
+                                    application.destinations.add(name);
+                                }
+                                Collections.sort(application.destinations, String.CASE_INSENSITIVE_ORDER);
+                                initDestinationsSpinner();
 
-                            for (int i = 0; i < destinations.length(); i++) {
-                                String name = destinations.getJSONObject(i).getString("name");
-                                application.destinations.add(name);
+                                // Adding the beacons to the array of beacons
+                                JSONArray beacons = obj.getJSONArray("beacons");
+                                application.beacons.clear();
+
+                                for (int i = 0; i < beacons.length(); i++) {
+                                    String name = beacons.getString(i);
+                                    application.beacons.add(name);
+                                }
+                                startService(new Intent(getApplicationContext(), EstimoteScan.class));
+
+                            } catch (Exception e) {
+                                Log.d(TAG, "messageArrived Error: " + e.getMessage());
                             }
-                            Collections.sort(application.destinations, String.CASE_INSENSITIVE_ORDER);
-                            initDestinationsSpinner();
-
-                            // Adding the beacons to the array of beacons
-                            JSONArray beacons = obj.getJSONArray("beacons");
-                            application.beacons.clear();
-
-                            for (int i = 0; i < beacons.length(); i++) {
-                                String name = beacons.getString(i);
-                                application.beacons.add(name);
+                        } else if (topic.equals(application.S2M_GET_TOURS)) {
+                            try {
+                                // Adding the tour to the array of tours
+                                JSONObject tour = obj.getJSONObject("tour");
+                                application.tours.clear();
+                                application.tours.add(tour.getString("name"));
+                                initToursSpinner();
+                            } catch (Exception e) {
+                                Log.d(TAG, "messageArrived Error: " + e.getMessage());
                             }
-                            startService(new Intent(getApplicationContext(), EstimoteScan.class));
-
-                        } catch(Exception e){
-                            Log.d(TAG, "messageArrived Error: "+e.getMessage());
-                        }
-                    } else if(topic.equals(application.S2M_GET_TOURS)) {
-                        try {
-                            // Adding the tour to the array of tours
-                            JSONObject tour = obj.getJSONObject("tour");
-                            application.tours.clear();
-                            application.tours.add(tour.getString("name"));
-                            initToursSpinner();
-                        } catch(Exception e){
-                            Log.d(TAG, "messageArrived Error: "+e.getMessage());
                         }
                     }
+                }catch(Exception e){
+                    Log.d(TAG, e.getMessage());
+                    return;
                 }
             }
         });

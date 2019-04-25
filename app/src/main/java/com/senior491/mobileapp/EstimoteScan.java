@@ -31,7 +31,7 @@ public class EstimoteScan extends Service {
     private String nearestBeaconTag;
     private String nearestBeaconId;
 
-    private static final String TAG = "SeniorSucksEstimoteScan";
+    private static final String TAG = "EstimoteScan_Tag";
 
     public boolean isObserving(){
         return observing;

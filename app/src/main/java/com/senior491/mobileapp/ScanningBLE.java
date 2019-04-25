@@ -28,7 +28,7 @@ public class ScanningBLE {
     private String mode;
     private boolean scanningStopped;
 
-    private static final String TAG = "SeniorSucks_Scanning";
+    private static final String TAG = "ScanningBLE_Tag";
     private static final long SCAN_PERIOD = 5000;
 
     public ScanningBLE(BluetoothLeScanner scanner, App application, ServiceInteractionListener mListener){

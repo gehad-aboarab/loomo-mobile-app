@@ -23,7 +23,7 @@ public class SuccessActivity extends Activity {
     private Button okButton;
     private Button dismissButton;
     private App application;
-    private final static String TAG = "SeniorSucks_Success";
+    private final static String TAG = "SuccessActivity_Tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,7 @@ public class SuccessActivity extends Activity {
 
         // Displaying the appropriate text depending on the mode
         if (application.currentState == application.BOUND_JOURNEY_ENDED) {
-            successTextView.setText("Journey has ended, you can dismiss Loomo now.");
+            successTextView.setText("Journey has ended!\n You can dismiss Loomo now.");
             okButton.setVisibility(View.GONE);
         } else if (application.currentMode == application.RIDE_MODE) {
             successTextView.setText("Let's go, hop onto Loomo!");
@@ -45,9 +45,6 @@ public class SuccessActivity extends Activity {
         } else if (application.currentMode == application.GUIDE_MODE) {
             successTextView.setText("Let's go, follow Loomo!");
             okButton.setText("Start Journey");
-        } else if(application.currentMode == application.GUIDE_MODE) {
-            successTextView.setText("Let's go, follow Loomo!");
-            okButton.setText("Start Tour");
         }
 
         okButton.setOnClickListener(new View.OnClickListener() {
@@ -115,13 +112,16 @@ public class SuccessActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences sp = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        application.currentDestination = sp.getString("destination", null);
-        application.currentTour = sp.getString("tour", null);
-        application.currentMode = sp.getInt("mode", application.GUIDE_MODE);
-        application.currentState = sp.getInt("state", application.UNBOUND);
-        application.loomoId = sp.getString("loomoId", null);
+        initApplicationVariables();
         startMqtt();
+    }
+
+    public void initApplicationVariables(){
+        application.loomoId = application.sp.getString("loomoId", null);
+        application.currentMode = application.sp.getInt("mode", application.GUIDE_MODE);
+        application.currentState = application.sp.getInt("state", application.UNBOUND);
+        application.currentDestination = application.sp.getString("destination", null);
+        application.currentTour = application.sp.getString("tour", null);
     }
 
     private void startMqtt(){

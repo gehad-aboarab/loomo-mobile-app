@@ -46,7 +46,7 @@ public class LoadingActivity extends Activity {
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
-    private static final String TAG = "SeniorSucks_Loading";
+    private static final String TAG = "LoadingActivity_Tag";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -117,14 +117,7 @@ public class LoadingActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "On resume called.");
-
-        SharedPreferences sp = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        application.currentDestination = sp.getString("destination", null);
-        application.currentTour = sp.getString("tour", null);
-        application.currentMode = sp.getInt("mode", application.GUIDE_MODE);
-        application.currentState = sp.getInt("state", application.UNBOUND);
-        application.loomoId = sp.getString("loomoId", null);
+        initApplicationVariables();
 
         // Bluetooth permissions and initializations
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -185,8 +178,15 @@ public class LoadingActivity extends Activity {
 
     @Override
     protected void onPause() {
-        Log.d(TAG, "On pause called.");
         super.onPause();
+    }
+
+    public void initApplicationVariables(){
+        application.loomoId = application.sp.getString("loomoId", null);
+        application.currentMode = application.sp.getInt("mode", application.GUIDE_MODE);
+        application.currentState = application.sp.getInt("state", application.UNBOUND);
+        application.currentDestination = application.sp.getString("destination", null);
+        application.currentTour = application.sp.getString("tour", null);
     }
 
     public void updateCurrentGUI() {
@@ -210,7 +210,7 @@ public class LoadingActivity extends Activity {
                         } else if (application.currentMode == application.TOUR_MODE) {
                             mode = "tour";
                         }
-                        //Connection to server
+                        // Connection to server
                         MqttMessage msg = new MqttMessage();
                         JSONObject obj = new JSONObject();
                         try {
@@ -230,7 +230,7 @@ public class LoadingActivity extends Activity {
                             loomoStatusReceived = false;
                             timer = new Timer();
 
-                            // Wait for the server to reply within 4 seconds
+                            // Wait for the server to reply within 5 seconds
                             timer.schedule(new TimerTask() {
                                 @Override
                                 public void run() {
@@ -244,7 +244,7 @@ public class LoadingActivity extends Activity {
                                         });
                                     }
                                 }
-                            }, 4000);
+                            }, 5000);
                         } catch (MqttException e) {
                             e.printStackTrace();
                         }
@@ -254,7 +254,7 @@ public class LoadingActivity extends Activity {
                         finish();
                     }
                 }
-            }, 10000);
+            }, 5000);
 
         } else if (application.currentState == application.BOUND_ONGOING_JOURNEY) {
             // Update the GUI
