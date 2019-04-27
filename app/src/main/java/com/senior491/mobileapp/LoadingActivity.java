@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,6 +29,7 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,44 +50,13 @@ public class LoadingActivity extends Activity {
     private BluetoothAdapter bluetoothAdapter;
     private App application;
     private Timer timer;
+    private Timer stablizeTimer;
     private boolean loomoStatusReceived;
-    private ScanningBLE scanningBLE;
+    private String mode;
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
-    private static final String TAG = "SeniorSucks_Loading";
-
-    private ScanningBLE.ServiceInteractionListener mListener = new ScanningBLE.ServiceInteractionListener() {
-        @Override
-        public void onServiceInteraction(int callBackCode, Object obj) {
-            switch(callBackCode){
-                case 1001:
-                    //Toast.makeText(getApplicationContext(),(String)obj,Toast.LENGTH_LONG).show();
-                    Toasty.error(getApplicationContext(),(String)obj,Toast.LENGTH_LONG,true).show();
-                    finish();
-                    break;
-                case 1002:
-                    loomoStatusReceived = false;
-                    timer = new Timer();
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            if(!loomoStatusReceived){
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        //Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
-                                        Toasty.error(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT,true).show();
-                                        finish();
-                                    }
-                                });
-                            }
-                        }
-                    }, 4000);
-                    break;
-            }
-        }
-    };
+    private static final String TAG = "LoadingActivity_Tag";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -118,9 +89,9 @@ public class LoadingActivity extends Activity {
     }
 
     public void dismissLoomo(boolean serverCommand) {
-        if(!serverCommand) {
+        if (!serverCommand) {
             // If the user is bound, send dismiss command
-            if(application.currentState != application.UNBOUND){
+            if (application.currentState != application.UNBOUND) {
                 MqttMessage msg = new MqttMessage();
                 JSONObject obj = new JSONObject();
                 try {
@@ -136,11 +107,6 @@ public class LoadingActivity extends Activity {
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }
-
-             // If still scanning, stop scanning
-            } else if(scanningBLE.isScanning()) {
-                scanningBLE.stopScan();
-
             // If user not bound and not scanning, send dismiss command
             } else {
                 MqttMessage msg = new MqttMessage();
@@ -172,14 +138,7 @@ public class LoadingActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "On resume called.");
-
-        SharedPreferences sp = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        application.currentDestination = sp.getString("destination", null);
-        application.currentTour = sp.getString("tour", null);
-        application.currentMode = sp.getInt("mode", application.GUIDE_MODE);
-        application.currentState = sp.getInt("state", application.UNBOUND);
-        application.loomoId = sp.getString("loomoId", null);
+        initApplicationVariables();
 
         // Bluetooth permissions and initializations
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -242,20 +201,16 @@ public class LoadingActivity extends Activity {
 
     @Override
     protected void onPause() {
-        Log.d(TAG, "On pause called.");
         super.onPause();
     }
 
-
-//    public void updateSharedPrefs() {
-//        SharedPreferences.Editor editor = getSharedPreferences(application.SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
-//        editor.putString("loomoId", application.loomoId);
-//        editor.putInt("state", application.currentState);
-//        editor.putString("destination", application.currentDestination);
-//        editor.putString("tour", application.currentTour);
-//        editor.putInt("mode", mode);
-//        editor.commit();
-//    }
+    public void initApplicationVariables(){
+        application.loomoId = application.sp.getString("loomoId", null);
+        application.currentMode = application.sp.getInt("mode", application.GUIDE_MODE);
+        application.currentState = application.sp.getInt("state", application.UNBOUND);
+        application.currentDestination = application.sp.getString("destination", null);
+        application.currentTour = application.sp.getString("tour", null);
+    }
 
     public void updateCurrentGUI() {
         if (application.currentState == application.UNBOUND) {
@@ -263,8 +218,66 @@ public class LoadingActivity extends Activity {
             statusTextView.setText(application.RETRIEVE_LOCATION);
 //            progressBar.setVisibility(View.VISIBLE);
 
-            // Start scanning for beacons
-            scanningBLE = new ScanningBLE(bluetoothAdapter.getBluetoothLeScanner(), application, mListener);
+            // Scan for a few seconds
+            stablizeTimer = new Timer();
+            stablizeTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    // Wait for 6 seconds to get beacon
+                    if (application.currentBeacon != null) {
+                        Log.d(TAG, "Your location is " + application.currentBeacon);
+                        if (application.currentMode == application.GUIDE_MODE) {
+                            mode = "guide";
+                        } else if (application.currentMode == application.RIDE_MODE) {
+                            mode = "ride";
+                        } else if (application.currentMode == application.TOUR_MODE) {
+                            mode = "tour";
+                        }
+                        // Connection to server
+                        MqttMessage msg = new MqttMessage();
+                        JSONObject obj = new JSONObject();
+                        try {
+                            obj.put("clientID", application.clientId);
+                            obj.put("beaconID", application.currentBeacon);
+                            obj.put("mapName", application.mapName);
+                            obj.put("destination", application.currentDestination);
+                            obj.put("tour", application.currentTour);
+                            obj.put("mode", mode);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        msg.setPayload(obj.toString().getBytes());
+                        Log.d(TAG, msg.toString());
+                        try {
+                            application.mqttHelper.mqttAndroidClient.publish(application.M2S_BEACON_SIGNALS, msg);
+                            loomoStatusReceived = false;
+                            timer = new Timer();
+
+                            // Wait for the server to reply within 5 seconds
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    if (!loomoStatusReceived) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(getApplicationContext(), application.SERVER_ERROR, Toast.LENGTH_SHORT).show();
+                                                finish();
+                                            }
+                                        });
+                                    }
+                                }
+                            }, 5000);
+                        } catch (MqttException e) {
+                            e.printStackTrace();
+                        }
+
+                    } else {
+                        Toast.makeText(application, application.CANNOT_LOCATE, Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
+            }, 5000);
 
         } else if (application.currentState == application.BOUND_ONGOING_JOURNEY) {
             // Update the GUI
@@ -273,16 +286,19 @@ public class LoadingActivity extends Activity {
         }
     }
 
-    private void startMqtt(){
+    private void startMqtt() {
         application.mqttHelper.setCallback(new MqttCallbackExtended() {
             @Override
-            public void connectComplete(boolean b, String s) {}
+            public void connectComplete(boolean b, String s) {
+            }
 
             @Override
-            public void connectionLost(Throwable throwable) {}
+            public void connectionLost(Throwable throwable) {
+            }
 
             @Override
-            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {}
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+            }
 
             @Override
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
@@ -322,7 +338,6 @@ public class LoadingActivity extends Activity {
 
                         // Move to next activity and pass the mode as -1 to indicate end of journey
                         Intent intent = new Intent(getApplicationContext(), SuccessActivity.class);
-//                        intent.putExtra("mode", -1);
                         startActivity(intent);
 
                     } else if (topic.equals(application.S2M_LOOMO_DISMISS)) {

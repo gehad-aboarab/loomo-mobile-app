@@ -223,7 +223,7 @@
     <com.cooltechworks.views.ScratchImageView
         android:id="@+id/main_loomoImage"
         android:layout_width="409dp"
-        android:layout_height="301dp"
+        android:layout_height="226dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="10dp"
@@ -232,8 +232,10 @@
         android:src="@drawable/loomo_3"
         app:layout_constraintBottom_toTopOf="@+id/main_callButton"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.487"
         app:layout_constraintStart_toStartOf="parent"
-        />
+        app:layout_constraintTop_toBottomOf="@+id/main_radioGroup"
+        app:layout_constraintVertical_bias="0.872" />
 
     <!--<Button-->
         <!--android:id="@+id/main_callButton"-->

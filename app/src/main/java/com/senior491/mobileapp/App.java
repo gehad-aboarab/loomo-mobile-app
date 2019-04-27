@@ -41,7 +41,7 @@ public class App extends Application {
     public static final String M2S_START_JOURNEY = "mobile-to-server/start-journey";
     public static final String DEFAULT_DESTINATION = "Please select a destination";
     public static final String DEFAULT_TOUR = "Please select a tour";
-    public static final String TAG = "SeniorSucks_App";
+    public static final String TAG = "Application_Tag";
 
     public static final int TOUR_MODE = 2;
     public static final int GUIDE_MODE = 1;
@@ -60,32 +60,58 @@ public class App extends Application {
     public int currentMode;
     public String currentDestination;
     public String currentTour;
+    public String currentBeacon;
 
     public MqttHelper mqttHelper;
-    public String mapName = "EB2-Rotunda";
-    public String tourName = "EB2-Rotunda";
+    public String mapName = "EB2v2-Rotunda";
+    public String tourName = "EB2v2-Rotunda";
     public ArrayList<String> destinations;
     public ArrayList<String> tours;
+    public ArrayList<String> beacons;
+    public SharedPreferences sp;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        // Retrieving the client ID
         clientId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         Log.d(TAG, "My device ID: " + clientId);
+
+        // Initializing the lists
         destinations = new ArrayList<>();
         tours = new ArrayList<>();
+        beacons = new ArrayList<>();
 
-        SharedPreferences sp = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
-        loomoId = sp.getString("loomoId",null);
-        if (loomoId != null)
-            currentState = sp.getInt("currentState", UNBOUND);
-        else
-            currentState = UNBOUND;
+        // Defining the shared preferences file and initializing application variables
+        sp = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE);
+        initVariables();
 
+        // Updating shared preferences
+        updateBeacon(currentBeacon);
+        updateLoomoId(loomoId);
+        updateCurrentMode(currentMode);
+        updateCurrentState(currentState);
+        updateCurrentDestination(currentDestination);
+        updateCurrentTour(currentTour);
+
+        // Initializing the state the loomo state
+//        loomoId = sp.getString("loomoId",null);
+//        if (loomoId != null)
+//            currentState = sp.getInt("state", UNBOUND);
+//        else
+//            currentState = UNBOUND;
 
         mqttHelper = new MqttHelper(this);
+    }
 
+    public void initVariables(){
+        currentBeacon = sp.getString("beacon", "5812ca89ff64bf356564f5ee641f6f1b");
+        loomoId = sp.getString("loomoId", null);
+        currentMode = sp.getInt("mode", GUIDE_MODE);
+        currentState = sp.getInt("state", UNBOUND);
+        currentDestination = sp.getString("destination", null);
+        currentTour = sp.getString("tour", null);
     }
 
     public void updateCurrentMode(int mode){
@@ -110,9 +136,9 @@ public class App extends Application {
     }
 
     public void updateCurrentState(int state){
-        currentState = state;
+        this.currentState = state;
         SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
-        editor.putInt("state", currentState);
+        editor.putInt("state", this.currentState);
         editor.commit();
     }
 
@@ -120,6 +146,13 @@ public class App extends Application {
         this.loomoId = loomoId;
         SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
         editor.putString("loomoId", this.loomoId);
+        editor.commit();
+    }
+
+    public void updateBeacon(String beacon){
+        this.currentBeacon = beacon;
+        SharedPreferences.Editor editor = getSharedPreferences(SHARED_PREF_FILE, Context.MODE_PRIVATE).edit();
+        editor.putString("beacon", this.currentBeacon);
         editor.commit();
     }
 
