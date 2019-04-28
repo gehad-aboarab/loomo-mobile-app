@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
     private MaterialSpinner destinationSpinner;
     private RadioGroup radioGroup;
     private RadioButton tourRadioButton, rideRadioButton, guideRadioButton;
-    private TextView destinationsLabel, toursLabel;
+    private TextView destinationsLabel, toursLabel, welcomeLabel;
 
     private ScratchImageView loomoImage;
 
@@ -72,6 +72,7 @@ public class MainActivity extends Activity {
 
         destinationsLabel = (TextView) findViewById(R.id.main_destinationLabel);
         toursLabel = (TextView) findViewById(R.id.main_toursLabel);
+        welcomeLabel = (TextView) findViewById(R.id.welcomeText);
         radioGroup = (RadioGroup) findViewById(R.id.main_radioGroup);
         rideRadioButton = (RadioButton) findViewById(R.id.main_rideRadioButton);
         guideRadioButton = (RadioButton) findViewById(R.id.main_guideRadioButton);
@@ -92,6 +93,8 @@ public class MainActivity extends Activity {
                 }
             }
         });
+
+        welcomeLabel.setText("Welcome to EB2-Rotunda");
 
         destinationNames = new ArrayList<>();
         destinationNames.add(application.DEFAULT_DESTINATION);
